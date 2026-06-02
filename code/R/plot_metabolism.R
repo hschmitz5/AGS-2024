@@ -3,7 +3,6 @@ source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_diff_ab.R")
-library(patchwork)
 
 # Metabolism input file
 metab_fname <- "./data/metabolism_midas.xlsx"
@@ -42,24 +41,21 @@ df <- map_dfr(names(taxa), function(nm) {
     ) %>%
     mutate(metab = nm)
   }) %>%
-  # remove AOB because it is the same as NOB (single ASV)
-  filter(metab != "AOB") %>%
+  # remove AOB and NOB
+  filter(!metab %in% c("AOB", "NOB")) %>%
   mutate(
-    # change NOB to AOB/NOB
-    metab = if_else(metab == "NOB", "AOB/NOB", metab),
     panel = case_when(
-      metab %in% c("AOB/NOB") ~ "AOB = NOB",
       metab %in% c("GAO", "Nitrite reduction") ~ "Nitrite reduction & GAO",
       metab %in% c("PAO", "Filamentous") ~ "Filamentous & PAO"
     )
   )
 
 df$metab <- factor(
-  df$metab, levels = c("Nitrite reduction", "GAO", "Filamentous", "PAO", "AOB/NOB")
+  df$metab, levels = c("Nitrite reduction", "GAO", "Filamentous", "PAO")
   )
 
 df$panel <- factor(
-  df$panel, levels = c("Nitrite reduction & GAO", "Filamentous & PAO", "AOB = NOB")
+  df$panel, levels = c("Nitrite reduction & GAO", "Filamentous & PAO")
   )
 
 # ------------ Plot ------------------
@@ -80,9 +76,9 @@ p <- ggplot(data = df,
   ) +
   scale_color_manual(
     values = c(
-      "AOB/NOB" = "darkorange2", "Nitrite reduction" = "sienna4",
-      "PAO" = "darkorchid4", "GAO" = "green4",
-      "Filamentous" = "black"
+      "Nitrite reduction" = "black",
+      "PAO" = "darkorchid4", "GAO" = "rosybrown",
+      "Filamentous" = "gray"
     )
   ) +
   guides(color = guide_legend(nrow = 2, byrow = FALSE)) +
@@ -95,4 +91,4 @@ p <- ggplot(data = df,
 
 # Save plot
 fname <- "./figures/metabolism.png"
-ggsave(fname, plot = p, width = 9, height = 3.5, dpi = 300)
+ggsave(fname, plot = p, width = 6.5, height = 3.2, dpi = 300)
