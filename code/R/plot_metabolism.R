@@ -41,21 +41,23 @@ df <- map_dfr(names(taxa), function(nm) {
     ) %>%
     mutate(metab = nm)
   }) %>%
-  # remove AOB and NOB
-  filter(!metab %in% c("AOB", "NOB")) %>%
+  # remove AOB (only one ASV which is same as NOB)
+  filter(!metab %in% "AOB") %>%
   mutate(
+    metab = if_else(metab == "NOB", "AOB = NOB", metab),
     panel = case_when(
       metab %in% c("GAO", "Nitrite reduction") ~ "Nitrite reduction & GAO",
-      metab %in% c("PAO", "Filamentous") ~ "Filamentous & PAO"
+      metab %in% c("PAO", "Filamentous") ~ "Filamentous & PAO",
+      metab %in% c("AOB = NOB") ~ "AOB & NOB"
     )
   )
 
 df$metab <- factor(
-  df$metab, levels = c("Nitrite reduction", "GAO", "Filamentous", "PAO")
+  df$metab, levels = c("Nitrite reduction", "GAO", "Filamentous", "PAO", "AOB = NOB")
   )
 
 df$panel <- factor(
-  df$panel, levels = c("Nitrite reduction & GAO", "Filamentous & PAO")
+  df$panel, levels = c("Nitrite reduction & GAO", "Filamentous & PAO", "AOB & NOB")
   )
 
 # ------------ Plot ------------------
@@ -69,26 +71,26 @@ p <- ggplot(data = df,
     width = 0.2,
     position = position_dodge(width = 0.2)
   ) +
-  facet_wrap(~panel, scales = "free") +
+  facet_wrap(~panel, nrow = 2, scales = "free") +
   labs(
     x = "Size",
     y = "Relative Abundance [%]"
   ) +
   scale_color_manual(
     values = c(
-      "Nitrite reduction" = "black",
-      "PAO" = "darkorchid4", "GAO" = "rosybrown",
-      "Filamentous" = "gray"
+      "Nitrite reduction" = "black", "GAO" = "rosybrown",
+      "Filamentous" = "gray", "PAO" = "darkorchid4", 
+      "AOB = NOB" = "lightsteelblue"
     )
   ) +
   guides(color = guide_legend(nrow = 2, byrow = FALSE)) +
   theme_minimal(base_size = 12) +
   theme(
     legend.position = "bottom",
-    legend.key.spacing.x = unit(1.2, "in"),
+    legend.key.spacing.x = unit(0.5, "in"),
     legend.title = element_blank()
   ) 
 
 # Save plot
 fname <- "./figures/metabolism.png"
-ggsave(fname, plot = p, width = 6.5, height = 3.2, dpi = 300)
+ggsave(fname, plot = p, width = 6.5, height = 5, dpi = 300)
