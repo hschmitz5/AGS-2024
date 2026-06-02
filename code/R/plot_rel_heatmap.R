@@ -2,8 +2,7 @@ rm(list = ls())
 source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
-source("./code/R/03_diff_ab.R")
-source("./code/R/04_DA_agglom.R")
+source("./code/R/03_metab_and_DA.R")
 library(ComplexHeatmap)
 library(circlize)
 
@@ -24,6 +23,8 @@ col_fontsize <- 11
 # Pseudo count to add when converting to log
 # (choose based on detection limit)
 pseudo <- 1e-6  
+
+# --------- Data ------------
 
 #### Rename: agglomerate names when multiple ASVs are differentially abundant or not
 rel_wide <- get_rel_agglom(ps, ancom_fname, rel_ab_cutoff, p_threshold)
