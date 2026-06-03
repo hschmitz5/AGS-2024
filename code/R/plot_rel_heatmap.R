@@ -73,6 +73,7 @@ sz_colors <- c(rep("lightgray", n_sizes))
 # Metabolism
 m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F") 
 
+
 bot_annot <- HeatmapAnnotation(
   # size annotation
   sz = anno_block(
@@ -90,7 +91,9 @@ bot_annot <- HeatmapAnnotation(
   PD = anno_points(
     pd, 
     ylim = c(ylim1, ylim2),
-    axis_param = list(at = c(ylim1, mean(c(ylim1, ylim2)), ylim2))
+    axis_param = list(
+      at = c(ylim1, mean(c(ylim1, ylim2)), ylim2)
+    )
   ),
   annotation_name_side = "left",
   annotation_name_rot = 0
@@ -118,22 +121,27 @@ m_annot <- rowAnnotation(
 
 ht <- Heatmap(
   data_mat,
-  bottom_annotation = bot_annot,
-  right_annotation = m_annot, 
+  # columns
+  cluster_columns = FALSE, # changes sample order
+  show_column_names = FALSE,
+  column_split = split, # put a gap between sizes
+  column_title = NULL,
+  # rows
+  show_row_names = TRUE,
+  row_names_side = "right", 
+  row_dend_side = "left",
+  # heatmap legend
+  show_heatmap_legend = TRUE, 
+  col = ht_colors,
   heatmap_legend_param = list(
     title = "Relative Abundance\n(Log (%))",
     direction = "horizontal",
     title_position = "topcenter"
   ),
-  column_split = split, # put a gap between sizes
-  cluster_columns = FALSE,
-  show_heatmap_legend = TRUE, 
-  show_row_names = TRUE,
-  show_column_names = FALSE,
-  column_names_rot = 0,
-  column_names_centered = TRUE,
-  column_title = NULL,
-  col = ht_colors,
+  # Annotations
+  bottom_annotation = bot_annot,
+  right_annotation = m_annot, 
+  # Display size
   width  = unit(n_cols * cell_w, "inches"),
   height = unit(n_rows * cell_h, "inches"),
   row_names_gp = gpar(fontsize = row_fontsize, fontface = row_fontface),
