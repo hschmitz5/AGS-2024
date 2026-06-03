@@ -22,13 +22,15 @@ ps <- qiime2R::qza_to_phyloseq(
 ps@sam_data$size.mm <- factor(ps@sam_data$size.mm, levels = size$ranges)
 ps@sam_data$size.name <- factor(size$name[as.numeric(ps@sam_data$size.mm)], levels = size$name)
   
-#### Filter ####
-  
+# ------ Filter ------
+
 # remove Mitochondria and Chloroplasts (removes Eukaryotes)
 ps_filt0 <- phyloseq::subset_taxa(ps, ! Family %in% c("Mitochondria", "Chloroplast"))
 # remove unclassified sequences
 ps_filt0 <- phyloseq::subset_taxa(ps, Kingdom != "Unassigned")
   
+# ------ Rarefy ------
+
 # define minimum depth to rarefy
 rarefy_level <- min(sample_sums(ps_filt0))  # lowest number of ASVs per sample
 # apply rarefaction
@@ -36,7 +38,8 @@ ps_filt <-rarefy_even_depth(
   ps_filt0, rarefy_level, rngseed = 7, replace = TRUE, trimOTUs = TRUE, verbose = TRUE
 )
 
-# Generate new names for OTUs
+# ------ Generate new names for OTUs -------
+
 taxonomy <- as.data.frame(as.matrix(ps_filt@tax_table)) %>%
   rownames_to_column("OTU") %>%
   mutate(
