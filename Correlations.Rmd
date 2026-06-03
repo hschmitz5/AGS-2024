@@ -18,6 +18,9 @@ source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
 source("./code/R/04_bias_correct.R")
 
+# For correlation
+size_midpoint <- c(1.125, 1.7, 2.4, 3.4, 4.5)
+
 p_threshold <- 0.15
 
 # Choose DA taxa
@@ -104,7 +107,8 @@ merged <- as.data.frame(modulus) %>%
 var_pairs <- list(
   TB_mod   = c("TB.avg", "G1.avg"),
   LB_mod   = c("LB.avg", "G1.avg"),
-  size_mod = c("size.midpoint", "G1.avg"),
+  size_G1 = c("size.midpoint", "G1.avg"),
+  size_G2 = c("size.midpoint", "G2.avg"),
   size_TB  = c("size.midpoint", "TB.avg"),
   size_LB  = c("size.midpoint", "LB.avg")
 )
