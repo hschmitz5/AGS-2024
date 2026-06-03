@@ -67,3 +67,23 @@ get_rel_ASV <- function(ps) {
   
   phyloseq::psmelt(ps_rel_ASV)
 }
+
+get_diversity <- function(ps) {
+  library(picante) 
+  # metadata
+  metadata <- get_metadata(ps)
+  # community data
+  comm <- as.data.frame(as.matrix(ps@otu_table)) %>%
+    t() 
+  # phylogenetic tree
+  phy <- ps@phy_tree
+  
+  # PD: phylogenetic diversity (Faith's)
+  # SR: species richness
+  pd_results <- pd(comm, phy) %>%
+    dplyr::select(PD) %>%
+    rownames_to_column(var = "Sample") %>%
+    mutate(Sample = factor(Sample, levels = sam_name)) %>%
+    arrange(Sample) %>%
+    column_to_rownames(var = "Sample")
+}
