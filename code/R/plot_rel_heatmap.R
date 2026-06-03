@@ -41,15 +41,11 @@ DA_taxa_renamed <- rel_wide %>%
 #### Load metabolism
 m_df <- as.data.frame(get_metabolism(rel_wide, metab_fname))
 
-#### Check what percent of relative abundance is included in plot
-# sum per sample
-rel_sum <- rel_wide %>%
-  dplyr::select(-Genus, -DA) %>%
-  column_to_rownames(var = "OTU") %>%
-  colSums() 
-# min and max of all sample sums
-message(paste("Heatmap Min:", round(min(rel_sum), 2), "%"))
-message(paste("Heatmap Max:", round(max(rel_sum), 2), "%"))
+#### Load Diversity
+pd <- get_diversity(ps) 
+# y-axis limits
+ylim1 <- floor(min(pd$PD) / 10) * 10
+ylim2 <- ceiling(max(pd$PD) / 10) * 10
 
 # ---- Plotting
 n_cols <- ncol(data_mat)
@@ -77,8 +73,8 @@ sz_colors <- c(rep("lightgray", n_sizes))
 # Metabolism
 m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F") 
 
-# Size Annotation
-size_annot <- HeatmapAnnotation(
+bot_annot <- HeatmapAnnotation(
+  # size annotation
   sz = anno_block(
     gp = gpar(
       fill = sz_colors,
@@ -89,17 +85,27 @@ size_annot <- HeatmapAnnotation(
       col = c(rep("black", n_sizes)), 
       fontsize = col_fontsize
     )
-  )
+  ),
+  # diversity annotation
+  PD = anno_points(
+    pd, 
+    ylim = c(ylim1, ylim2),
+    axis_param = list(at = c(ylim1, mean(c(ylim1, ylim2)), ylim2))
+  ),
+  annotation_name_side = "left",
+  annotation_name_rot = 0
 )
 
-# Metabolism Annotation
+# metabolism annotation
 m_annot <- rowAnnotation(
   df = m_df,
+  # color
   col = col_list <- setNames(
     rep(list(m_colors), ncol(m_df)),
     colnames(m_df)
   ),
   na_col = NA, # no color for NA
+  # legend
   show_legend = c(TRUE, c(rep(FALSE, length(m_df)-1))),  # Only first column contributes
   annotation_legend_param = list(
     title = "Metabolism\n& Cell Properties",
@@ -112,10 +118,10 @@ m_annot <- rowAnnotation(
 
 ht <- Heatmap(
   data_mat,
-  bottom_annotation = size_annot,
+  bottom_annotation = bot_annot,
   right_annotation = m_annot, 
   heatmap_legend_param = list(
-    title = "Relative Abundance\n[Log(%)]",
+    title = "Relative Abundance\n(Log (%))",
     direction = "horizontal",
     title_position = "topcenter"
   ),
@@ -142,6 +148,16 @@ png(fname_rel,
 draw(ht, heatmap_legend_side = "top", annotation_legend_side = "top") 
 dev.off()
 
+
+#### Check what percent of relative abundance is included in plot
+# sum per sample
+rel_sum <- rel_wide %>%
+  dplyr::select(-Genus, -DA) %>%
+  column_to_rownames(var = "OTU") %>%
+  colSums() 
+# min and max of all sample sums
+message(paste("Heatmap Min:", round(min(rel_sum), 2), "%"))
+message(paste("Heatmap Max:", round(max(rel_sum), 2), "%"))
 
 
 #### Export to Excel
