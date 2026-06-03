@@ -136,9 +136,14 @@ dev.off()
 if (write2excel == 1) {
   library(writexl)
   
-  new_m <- rownames_to_column(m_df, var = "OTU")
+  new_m <- m_df %>%
+    # tf is true if any values in row are defined
+    mutate(tf = as.integer(if_any(everything(), ~ !is.na(.x)))) %>%
+    rownames_to_column(var = "OTU")
+  
   full_df <- left_join(rel_wide, new_m, by = "OTU") %>%
-    dplyr::select(-DA) %>%
+    filter(tf == 1) %>%
+    dplyr::select(-DA, -tf) %>%
     relocate(where(is.numeric), .after = where(is.character)) %>%
     arrange(Genus)
   
