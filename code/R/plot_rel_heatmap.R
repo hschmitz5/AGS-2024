@@ -1,16 +1,13 @@
 rm(list = ls())
-source("./code/R/00_setup.R")
-source("./code/R/01_load_data.R")
-source("./code/R/02_process_ps.R")
-source("./code/R/03_metab_and_DA.R")
 library(ComplexHeatmap)
 library(circlize)
-
-# Metabolism input file
-metab_fname <- "./data/metabolism_midas.xlsx"
+source("./code/R/01_load_ps.R")
+source("./code/R/02_metab_and_DA.R")
 
 # Figure output location
 fname_rel <- "./figures/rel_ab_heatmap.png"
+
+write2excel <- 0
 
 # Cell height in inches (adjust as needed)
 cell_h <- 0.2
@@ -134,3 +131,16 @@ png(fname_rel,
     units = "in", res = 300)
 draw(ht, heatmap_legend_side = "top", annotation_legend_side = "top") 
 dev.off()
+
+#### Export to Excel
+if (write2excel == 1) {
+  library(writexl)
+  
+  new_m <- rownames_to_column(m_df, var = "OTU")
+  full_df <- left_join(rel_wide, new_m, by = "OTU") %>%
+    dplyr::select(-DA) %>%
+    relocate(where(is.numeric), .after = where(is.character)) %>%
+    arrange(Genus)
+  
+  write_xlsx(full_df, path = "./data/rel_ab_metab.xlsx")
+}
