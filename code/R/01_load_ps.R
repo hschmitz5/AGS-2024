@@ -40,9 +40,6 @@ size <- data.frame(
 sam_name <- c("20A", "20B", "20C", "14A", "14B", "14C", "10A", "10B", "10C",
               "7A", "7B", "7C", "5A", "5B", "5C")
 
-# For correlation
-size_midpoint <- c(1.125, 1.7, 2.4, 3.4, 4.5)
-
 # ------ Change OTU to Species_updated --------
 
 taxonomy <- data.frame(tax_table(ps))
