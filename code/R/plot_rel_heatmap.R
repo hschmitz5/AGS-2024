@@ -88,15 +88,15 @@ bot_annot <- HeatmapAnnotation(
     )
   ),
   # diversity annotation
-  PD = anno_points(
+  Diversity = anno_points(
     pd, 
     ylim = c(ylim1, ylim2),
     axis_param = list(
       at = c(ylim1, mean(c(ylim1, ylim2)), ylim2)
     )
   ),
-  annotation_name_side = "left",
-  annotation_name_rot = 0
+  annotation_name_side = "left"
+  # annotation_name_rot = 0
 )
 
 # metabolism annotation
