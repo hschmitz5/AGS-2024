@@ -41,6 +41,16 @@ DA_taxa_renamed <- rel_wide %>%
 #### Load metabolism
 m_df <- as.data.frame(get_metabolism(rel_wide, metab_fname))
 
+#### Check what percent of relative abundance is included in plot
+# sum per sample
+rel_sum <- rel_wide %>%
+  dplyr::select(-Genus, -DA) %>%
+  column_to_rownames(var = "OTU") %>%
+  colSums() 
+# min and max of all sample sums
+message(paste("Heatmap Min:", round(min(rel_sum), 2), "%"))
+message(paste("Heatmap Max:", round(max(rel_sum), 2), "%"))
+
 # ---- Plotting
 n_cols <- ncol(data_mat)
 n_rows <- nrow(data_mat)
@@ -132,10 +142,11 @@ png(fname_rel,
 draw(ht, heatmap_legend_side = "top", annotation_legend_side = "top") 
 dev.off()
 
+
+
 #### Export to Excel
+
 if (write2excel == 1) {
-  library(writexl)
-  
   new_m <- m_df %>%
     # tf is true if any values in row are defined
     mutate(tf = as.integer(if_any(everything(), ~ !is.na(.x)))) %>%
@@ -147,5 +158,6 @@ if (write2excel == 1) {
     relocate(where(is.numeric), .after = where(is.character)) %>%
     arrange(Genus)
   
-  write_xlsx(full_df, path = "./data/rel_ab_metab.xlsx")
+  library(writexl)
+  write_xlsx(full_df, path = "./data/rel_ab_metab_high_ab.xlsx")
 }
