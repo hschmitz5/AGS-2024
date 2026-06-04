@@ -1,6 +1,5 @@
 rm(list = ls())
 library(ComplexHeatmap)
-library(circlize)
 source("./code/R/01_load_ps.R")
 source("./code/R/02_metab_and_DA.R")
 
@@ -95,8 +94,7 @@ m_annot <- rowAnnotation(
   # legend
   show_legend = c(TRUE, c(rep(FALSE, length(m_df)-1))),  # Only first column contributes
   annotation_legend_param = list(
-    title = NULL, #"Metabolism\n& Cell Properties",
-    #title_position = "topcenter",
+    title = NULL, 
     at = c("P", "V"),
     labels = c("Positive", "Variable"),
     nrow = 2
@@ -116,7 +114,7 @@ ht <- Heatmap(
   show_heatmap_legend = TRUE, 
   col = ht_colors,
   heatmap_legend_param = list(
-    title = "Log (%)", #Relative Abundance\n(Log (%))
+    title = "Log (%)", 
     direction = "horizontal",
     title_position = "lefttop"
   ),
