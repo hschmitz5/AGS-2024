@@ -38,8 +38,7 @@ DA_taxa_renamed <- rel_wide %>%
   pull(OTU)
 
 #### Load metabolism
-m_df <- as.data.frame(get_metabolism(rel_wide, metab_fname)) %>%
-  rename(`NO2 reduction` = `Nitrite reduction`)
+m_df <- as.data.frame(get_metabolism(rel_wide, metab_fname)) 
 
 # ---- Plotting
 n_cols <- ncol(data_mat)
