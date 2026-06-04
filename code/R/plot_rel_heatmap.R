@@ -99,8 +99,8 @@ m_annot <- rowAnnotation(
     labels = c("Positive", "Variable"),
     nrow = 2
   ),
-  annotation_name_side = "top",
-  annotation_name_rot = 60
+  annotation_name_side = "bottom",
+  annotation_name_rot = -60
 )
 
 ht <- Heatmap(
