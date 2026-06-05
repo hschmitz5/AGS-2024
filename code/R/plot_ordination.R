@@ -29,7 +29,7 @@ p <- plot_ordination(ps_full, ps.ord, type="samples", color="size.name", shape =
 
 ordination_plot <- p
 
-ggsave(fname_ord, plot = ordination_plot, width = 5, height = 3, dpi = 600)
+ggsave(fname_ord, plot = ordination_plot, width = 6.5, height = 3, dpi = 600)
 
 
 # For correlation
