@@ -1,4 +1,5 @@
 rm(list = ls())
+library(ggConvexHull)
 source("./code/R/01_load_ps.R")
 
 fname_ord <- "./figures/ordination-PCoA.png"
@@ -10,18 +11,19 @@ ps_full <- readRDS("./data/ps_ASV_full.rds")
 # ps_full: all sample groups
 ps.ord <- ordinate(ps_full, "PCoA", "wunifrac")
 
-# colors
-cols <- c("gray", met.brewer(size_pal, n_sizes))
-
 # symbol
 # 16 = filled circle, 17 = triangle, 15 = square, 18 = diamond, etc.
 shapes <- c(16, 17, 15, 18, 3, 7)
 
-p <- plot_ordination(ps_full, ps.ord, type="samples", color="size.name", shape = "size.name") +
-  # stat_ellipse(geom = "polygon", type="norm", alpha=0.4, aes(fill=size.name)) + # need at least 4 points
-  scale_color_manual(values = cols) +
+# colors
+cols <- c("gray", met.brewer(size_pal, n_sizes))
+
+p <- plot_ordination(ps_full, ps.ord, shape = "size.name", color="size.name") +
+  geom_convexhull(alpha = 0.5, aes(fill = size.name)) +
   scale_shape_manual(values = shapes) +
-  labs(color = "Size", shape = "Size") +
+  scale_color_manual(values = cols) +
+  scale_fill_manual(values = cols) +
+  labs(shape = "Size", color = "Size", fill = "Size") +
   theme_minimal(base_size = 12) +
   theme(
     plot.title = element_text(size = 12)
