@@ -29,7 +29,7 @@ p <- plot_ordination(ps_full, ps.ord, shape = "size.name", color="size.name") +
     plot.title = element_text(size = 12)
   ) 
 
-ordination_plot <- p
+ordination_plot <- p 
 
 ggsave(fname_ord, plot = ordination_plot, width = 6.5, height = 3, dpi = 600)
 
