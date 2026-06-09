@@ -15,6 +15,9 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, cache = TRU
 ps_fname <- "./data/ps_genus_subset.rds"
 ps <- readRDS(ps_fname)
 
+metadata <- data.frame(sample_data(ps)) %>%
+  rownames_to_column(var = "Sample") 
+
 
 # Color Palettes (MetBrewer)
 size_pal <- "Greek"     # reds
@@ -41,13 +44,14 @@ sam_name <- c("20A", "20B", "20C", "14A", "14B", "14C", "10A", "10B", "10C",
 # ------ Functions for processing phyloseq object ----
 
 get_metadata <- function(ps){
-  metadata <- as.data.frame(sample_data(ps)) %>%
+  # cannot use as.data.frame because class will be phyloseq 
+  metadata <- data.frame(sample_data(ps)) %>%
     tibble::rownames_to_column("Sample") %>%
     arrange(size.name)
 }
 
 get_taxonomy <- function(ps){
-  taxonomy <- as.data.frame(tax_table(ps)) %>%
+  taxonomy <- data.frame(tax_table(ps)) %>%
     tibble::rownames_to_column("OTU")
 }
 

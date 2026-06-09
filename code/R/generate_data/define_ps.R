@@ -49,7 +49,7 @@ ps_genus_short = tax_glom(ps_filt, "Genus")
 # ------ Agglomerate, keeping NA values  ------
 
 # If Genus is NA, then replace with higher order
-taxonomy <- as.data.frame(ps_filt@tax_table) %>%
+taxonomy <- data.frame(ps_filt@tax_table) %>%
   rownames_to_column("OTU") %>%
   mutate(
     Genus = case_when(
