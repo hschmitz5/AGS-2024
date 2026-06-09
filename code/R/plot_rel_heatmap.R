@@ -117,7 +117,7 @@ m_annot <- rowAnnotation(
 ht <- Heatmap(
   data_mat,
   # columns
-  column_title = "Relative Abundance",
+  column_title = NULL, # "Relative Abundance",
   cluster_columns = FALSE, # changes sample order
   show_column_names = FALSE,
   column_split = split, # put a gap between sizes
