@@ -2,24 +2,19 @@ rm(list = ls())
 library(writexl)
 source("./code/R/01_load_ps.R")
 
+rel_ab_cutoff <- 0.5 # percent
+
 fname_out <- "./data/midas_genera.xlsx"
 
 # define taxa in which at least one sample has abundance > rel_ab_cutoff
-high_ab_taxa <- get_rel_ASV(ps) %>%
+taxa_names <- get_rel(ps) %>%
   filter(Abundance > rel_ab_cutoff) %>%
-  distinct(OTU) %>%
-  pull(OTU)
+  distinct(Genus) %>%
+  pull(Genus)
 
-distinct_genera <- get_rel_ASV(ps) %>%
-  filter(OTU %in% high_ab_taxa) %>%
-  dplyr::select(Genus, OTU, Sample, Abundance) %>%  
-  pivot_wider(
-    names_from = Sample,
-    values_from = Abundance
-  ) %>%
-  dplyr::select(Genus, OTU, sam_name) %>%
-  filter(!is.na(Genus)) %>%
-  arrange(Genus) %>%
-  distinct(Genus)
+high_ab_genera <- get_rel_wide(ps) %>%
+  rownames_to_column(var = "Genus") %>%
+  filter(Genus %in% taxa_names) %>%
+  arrange(Genus) 
  
-write_xlsx(distinct_genera, path = fname_out)
+write_xlsx(high_ab_genera, path = fname_out)
