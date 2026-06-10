@@ -1,6 +1,5 @@
 rm(list = ls())
 library(ComplexHeatmap)
-library(circlize) # for colorRamp2
 source("./code/R/01_load_ps.R")
 source("./code/R/02_metab_and_DA.R")
 
@@ -92,6 +91,11 @@ lgd <- Legend(
 
 ## Relative Abundance
 
+# Dimensions
+n_cols <- ncol(log_mat)
+n_rows <- nrow(log_mat)
+split = rep(1:n_sizes, each = n_replicates)
+
 # Labels
 row_labels <- rownames(log_mat)
 # italicize species + _g, but not _f/_o/_c/_p
@@ -99,20 +103,11 @@ italic_rows <- !grepl("^(Unk|midas)", row_labels)
 # Apply
 row_fontface <- ifelse(italic_rows, "italic", "plain")
 
-# Dimensions
-n_cols <- ncol(log_mat)
-n_rows <- nrow(log_mat)
-split = rep(1:n_sizes, each = n_replicates)
-
 # Legend Colors
 ht_colors <- met.brewer(taxa_pal, type = "continuous")
-# Define corresponding relative and log values
-# breaks_log <- seq(min(log_mat), max(log_mat), length.out = length(ht_colors))
-# ht_col_fun <- colorRamp2(breaks_log, ht_colors)
-
 # Display legend ticks
-breaks_rel_display <- c(0, 0.1, 1, 10, 25)
-breaks_log_display <- log10(breaks_rel_display + pseudo)
+breaks_rel_display <- c(0, 0.1, 1, 10, 25) # %
+breaks_log_display <- log10(breaks_rel_display + pseudo) # Log (%)
 
 ht <- Heatmap(
   log_mat,
