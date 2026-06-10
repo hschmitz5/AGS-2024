@@ -1,10 +1,9 @@
 rm(list = ls())
-source("./code/R/00_setup.R")
-source("./code/R/01_load_data.R")
-source("./code/R/02_process_ps.R")
-source("./code/R/03_subset.R")
+source("./code/R/01_load_ps.R")
+source("./code/R/02_metab_and_DA.R")
 library(writexl)
 library(ComplexHeatmap)
+library(circlize) # for colorRamp2
 
 write2excel <- FALSE
 n_display_low <- 30
@@ -22,6 +21,34 @@ cell_w <- 0.6 # same as cell_h
 row_fontsize <- 10
 col_fontsize <- 11
 
+rel_ab_cutoff <- 0.5
+
+# ------ Process Data -----
+
+# load differential abundance data
+output <- readRDS(ancom_fname)
+
+# define taxa in which at least one sample has abundance > rel_ab_cutoff
+high_ab_taxa <- get_rel(ps) %>%
+  filter(Abundance > rel_ab_cutoff) %>%
+  distinct(OTU) %>%
+  pull(OTU)
+
+# At least one samples must be significant and pass sensitivity analysis
+DA_taxa <- output$res %>%
+  rename(OTU = taxon) %>%
+  filter(OTU %in% high_ab_taxa) %>%
+  # Combines diff_size* and passed_ss* together
+  pivot_longer(
+    cols = matches("q_size\\.name|passed_ss_size\\.name"),
+    names_to = c(".value","size"),
+    names_pattern = "(q|passed_ss)_size\\.name(.*)"
+  ) %>%
+  filter(q < p_threshold & passed_ss == TRUE) %>%   
+  distinct(OTU) %>%
+  pull(OTU)
+
+
 # Define matrix of log-fold change data per size
 process_lfc <- function(df, taxa) {
   df %>%
@@ -33,7 +60,7 @@ process_lfc <- function(df, taxa) {
       XL  = ifelse(q_size.nameXL  < p_threshold & passed_ss_size.nameXL,  lfc_size.nameXL, 0),
       XXL = ifelse(q_size.nameXXL < p_threshold & passed_ss_size.nameXXL, lfc_size.nameXXL, 0)
     ) %>%
-    dplyr::select(OTU, M, L, XL, XXL) %>% # Species - new name
+    dplyr::select(Genus, M, L, XL, XXL) %>% # Species - new name
     mutate(
       mean_lfc = rowMeans(across(M:XXL, abs), na.rm = TRUE)
     ) %>%
@@ -41,28 +68,22 @@ process_lfc <- function(df, taxa) {
     arrange(desc(mean_lfc))
 }
 
-# names of significant taxa
-sig_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel, fname_excel)
+taxonomy <- get_taxonomy(ps)
 
 # Read in data and add new names
-output <- readRDS(ancom_fname)
 res_prim <- output$res %>% 
-  rename(OTU = taxon)
+  rename(OTU = taxon) %>%
+  left_join(., taxonomy, by = "OTU")
 
 # Apply function to high and low abundance taxa
-lfc_high <- process_lfc(res_prim, sig_taxa$high_ab)
-lfc_low  <- process_lfc(res_prim, sig_taxa$low_ab)
+lfc_high <- process_lfc(res_prim, DA_taxa) 
+  
+# lfc_low  <- process_lfc(res_prim, DA_taxa$low_ab)
 
 ### For plotting
 fig_high <- lfc_high %>%
   dplyr::select(-mean_lfc) %>%
-  tibble::column_to_rownames("OTU") %>%
-  as.matrix()
-
-fig_low <- lfc_low %>%
-  head(n_display_low) %>%
-  dplyr::select(-mean_lfc) %>%
-  tibble::column_to_rownames("OTU") %>%
+  tibble::column_to_rownames("Genus") %>%
   as.matrix()
 
 # ---- Plotting
@@ -102,6 +123,9 @@ create_heatmap <- function(mat, rowname_w = NULL, col_title = NULL) {
   do.call(Heatmap, args)
 }
 
+
+
+
 ht_high <- create_heatmap(fig_high, NULL, paste0("ANCOM-BC2 DA Taxa"))
 
 col_fun <- colorRamp2(c(min(fig_high), 0, max(fig_high)), c("blue", "white", "red"))
@@ -125,20 +149,7 @@ rowname_width_in <- convertWidth(
   "inches", valueOnly = TRUE
 )
 
-ht_low  <- create_heatmap(fig_low, rowname_width_in, paste0(n_display_low, " largest lfc"))
-
-col_fun2 <- colorRamp2(c(min(fig_low), 0, max(fig_low)), c("blue", "white", "red"))
-
-lgd2 <- Legend(
-  col_fun = col_fun2,
-  title = "log fold change",
-  direction = "horizontal",
-  title_position = "topcenter",
-  at = pretty(c(min(fig_low), max(fig_low))),
-  labels = pretty(c(min(fig_low), max(fig_low)))
-)
-
-# Save images
+# Save image
 common_width <- ncol(fig_high) * cell_w + rowname_width_in + 2 # in
 png(fname_high, 
     width = common_width,
@@ -147,11 +158,3 @@ png(fname_high,
 draw(ht_high)
 draw(lgd, x = unit(0.41, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
 dev.off()
-
-# png(fname_low,
-#     width = common_width,
-#     height = nrow(fig_low) * cell_h + 2,
-#     units = "in", res = 300)
-# draw(ht_low)
-# draw(lgd2, x = unit(0.41, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
-# dev.off()
