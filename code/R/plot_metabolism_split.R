@@ -17,35 +17,39 @@ m <- get_metabolism(rel_size, metab_fname)
 # define taxa in each metabolism group
 taxa_P <- map(m, ~ rownames(m)[which(.x == "P")])
 taxa_V <- map(m, ~ rownames(m)[which(.x == "V")])
-taxa_PV <- map(m, ~ rownames(m)[.x %in% c("P", "V")])
+# combine taxa if the metab has entries in V
+taxa_PV <- map2(taxa_P, taxa_V, ~ {
+  if (length(.y) > 0) {
+    union(.x, .y)   # taxa that are P or V
+  } else {
+    character(0)    
+  }
+})
 
 # function sums up values when taxa = P or V
 summarize_metab <- function(taxa_list, value_col) {
   map_dfr(names(taxa_list), function(nm) {
     rel_size %>%
       filter(Genus %in% taxa_list[[nm]]) %>%
-      group_by(Sample, size.name) %>%
+      group_by(size.name, Sample) %>%
       summarize(
         sum_abund = sum(Abundance, na.rm = TRUE),
         .groups = "drop"
       ) %>%
-      mutate(metab_val = value_col, metab = nm) %>%
-      dplyr::select(metab_val, metab, Sample, size.name, sum_abund)
-  }) 
+      mutate(metab = nm)
+  }) %>%
+    group_by(metab, size.name) %>%
+    summarize(
+      mean_sum = mean(sum_abund, na.rm = TRUE),
+      sd_sum = sd(sum_abund, na.rm = TRUE),
+      .groups = "drop"
+    ) %>%
+    mutate(metab_val = value_col)
 }
 
-df_P  <- summarize_metab(taxa_P, "P") %>%
-  group_by(metab, size.name) %>%
-  summarize(
-    mean_agglom = mean(sum_abund, na.rm = TRUE),
-    sd_agglom = sd(sum_abund, na.rm = TRUE),
-    .groups = "drop"
-  ) 
-  
-df_V  <- summarize_metab(taxa_V, "V") 
+df_P  <- summarize_metab(taxa_P, "P") 
 # P + V: only sum metab found in V
-df_PV <- summarize_metab(taxa_PV, "P + V") %>%
-  filter(metab %in% unique(df_V$metab))
+df_PV <- summarize_metab(taxa_PV, "P + V") 
 
 
 # joins data sets
@@ -58,9 +62,7 @@ df <- bind_rows(df_P, df_PV) %>%
       metab %in% c("AOB", "NOB") ~ "AOB & NOB"
     ),
     metab_val = recode(metab_val, "P" = "Positive", "P + V" = "Positive + Variable")
-  ) %>%
-  # reorder
-  dplyr::select(panel, metab, metab_val, size.name, sum_mean, sum_sd)
+  ) 
 
 # Convert to factor
 df$size.name <- factor(df$size.name, levels = size$name)
@@ -74,11 +76,11 @@ df$panel <- factor(
 # ------------ Plot ------------------
 
 p <- ggplot(data = df, 
-            aes(x = size.name, y = sum_mean, linetype = metab_val, group = metab_val)) +
+            aes(x = size.name, y = mean_sum, linetype = metab_val, group = metab_val)) +
   geom_point(color = "steelblue") +
   geom_line(color = "steelblue") +
   geom_errorbar(
-    aes(ymin = sum_mean - sum_sd, ymax = sum_mean + sum_sd),
+    aes(ymin = mean_sum - sd_sum, ymax = mean_sum + sd_sum),
     color = "steelblue",
     width = 0.2,
     position = position_dodge(width = 0.2)
