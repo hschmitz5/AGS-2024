@@ -10,13 +10,11 @@ suppressPackageStartupMessages({
 })
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, cache = TRUE)
 
-
 # load phyloseq object (absolute counts)
-ps_fname <- "./data/ps_genus_subset.rds"
-ps <- readRDS(ps_fname)
+ps <- readRDS("./data/ps_genus_subset.rds")
 
-metadata <- data.frame(sample_data(ps)) %>%
-  rownames_to_column(var = "Sample") 
+# Metabolism input file
+metab_fname <- "./data/metabolism_midas.xlsx"
 
 
 # Color Palettes (MetBrewer)
@@ -71,4 +69,16 @@ get_rel_wide <- function(ps) {
     ) %>%
     column_to_rownames(var = "Genus") %>%
     dplyr::select(all_of(sam_name)) 
+}
+
+
+# input df must contain column named Genus
+get_metabolism <- function(df) {
+  m <- read_excel(metab_fname, sheet = "input") # tibble
+  
+  metab <- df %>%
+    dplyr::select(Genus) %>%
+    distinct() %>%
+    left_join(., m, by = "Genus") %>%
+    column_to_rownames("Genus")
 }
