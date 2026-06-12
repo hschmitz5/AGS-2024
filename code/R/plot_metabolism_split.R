@@ -3,7 +3,6 @@
 
 rm(list = ls())
 source("./code/R/01_load_ps.R")
-source("./code/R/02_metab_and_DA.R")
 
 write2excel <- 0
 
@@ -12,7 +11,7 @@ rel_size <- get_rel(ps)
 
 # Load metabolism data
 # Input must contain Genus
-m <- get_metabolism(rel_size, metab_fname)
+m <- get_metabolism(rel_size)
 
 # define taxa in each metabolism group
 taxa_P <- map(m, ~ rownames(m)[which(.x == "P")])
@@ -88,7 +87,7 @@ p <- ggplot(data = df,
   facet_wrap(~metab, nrow = 3, scales = "free") +
   labs(
     x = "Size",
-    y = "Relative Abundance [%]"
+    y = "Relative Abundance (%)"
   ) +
   theme_minimal(base_size = 12) +
   theme(
