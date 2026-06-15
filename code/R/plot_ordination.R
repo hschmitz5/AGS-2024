@@ -1,10 +1,10 @@
 rm(list = ls())
 source("./code/R/01_load_ps.R")
 
-fname_ord <- "./figures/ordination-PCoA-genus.png"
+fname_ord <- "./figures/ordination-PCoA-ASV.png"
 
 # load phyloseq object for all sample sizes
-ps_full <- readRDS("./data/ps_genus_full.rds") 
+ps_full <- readRDS("./data/ps_ASV_full.rds") 
 
 # ps_full: all sample groups
 ps.ord <- ordinate(ps_full, "PCoA", "wunifrac")
