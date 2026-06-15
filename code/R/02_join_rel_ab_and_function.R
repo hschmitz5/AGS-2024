@@ -52,14 +52,13 @@ join_rel_ab_and_function <- function(ps) {
       mutate(metab_val = value_col)
   }
   
-  P_summary <- summarize_metab(df_P, "P")
-  PV_summary <- summarize_metab(df_PV, "P + V")
+  P_summary <- summarize_metab(df_P, "Positive")
+  PV_summary <- summarize_metab(df_PV, "Positive + Variable")
   
   # joins data sets
   full_summary <- bind_rows(P_summary, PV_summary) %>%
     # define panel grouping
     mutate(
-      metab_val = recode(metab_val, "P" = "Positive", "P + V" = "Positive + Variable"),
       size.name = factor(size.name, levels = size$name)
     ) 
 
