@@ -37,20 +37,25 @@ taxa_PV <- map2(taxa_P, taxa_V, ~ {
   }
 })
 
-metab_mat <- purrr::map_dfr(
-  taxa_P,
-  ~ otu_df %>%
-    dplyr::filter(Genus %in% .x) %>%
-    dplyr::select(-Genus) %>%
-    colSums() %>%
-    t() %>%
-    as.data.frame(),
-  .id = "metab"
-) %>%
-  tibble::column_to_rownames("metab")
+agglom_metab <- function(taxa_list) {
+  metab_mat <- purrr::map_dfr(
+    taxa_list,
+    ~ otu_df %>%
+      dplyr::filter(Genus %in% .x) %>%
+      dplyr::select(-Genus) %>%
+      colSums() %>%
+      t() %>%
+      as.data.frame(),
+    .id = "metab"
+  ) %>%
+    tibble::column_to_rownames("metab")
+  
+  new_otu_table <- otu_table(as.matrix(metab_mat), taxa_are_rows = TRUE)
+  ps_metab <- phyloseq(new_otu_table, sample_data(ps))
+}
 
+ps_metab_P <- agglom_metab(taxa_P)
+saveRDS(ps_metab_P, file = "./data/ps_metab_P.rds")
 
-new_otu_table <- otu_table(as.matrix(metab_mat), taxa_are_rows = TRUE)
-ps_metab <- phyloseq(new_otu_table, sample_data(ps))
-
-saveRDS(ps_metab, file = "./data/ps_metab.rds")
+ps_metab_PV <- agglom_metab(taxa_PV)
+saveRDS(ps_metab_PV, file = "./data/ps_metab_PV.rds")
