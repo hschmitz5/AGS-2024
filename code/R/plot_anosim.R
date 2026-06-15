@@ -1,13 +1,14 @@
 rm(list = ls())
 library(vegan)
-source("./code/R/01_load_ps.R")
 
-# Define a base font size in points
-text_size <- 10
+# load phyloseq object for all sample sizes
+ps_full <- readRDS("./data/ps_ASV_full.rds") 
 
-metadata <- get_metadata(ps)
+metadata <- data.frame(sample_data(ps_full)) %>%
+  tibble::rownames_to_column("Sample") %>%
+  arrange(size.name)
 
-ps.dist <- distance(ps, method = "wunifrac" ) # weighted
+ps.dist <- distance(ps_full, method = "wunifrac" ) # weighted
 invisible(ps.dist)
 #show(ps.dist)
 
@@ -19,6 +20,9 @@ anosim_summary <- capture.output(summary(ps.ano))
 writeLines(anosim_summary, con = txt_fname)
 
 # ------- Plot --------
+
+# Define a base font size in points
+text_size <- 10
 
 # Extract ranks and groups into a data frame
 ano_df <- data.frame(
