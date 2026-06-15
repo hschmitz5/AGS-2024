@@ -26,25 +26,13 @@ ps@sam_data$size.midpoint <- size$midpoint[as.numeric(ps@sam_data$size.mm)]
   
 # ------ Filter ------
 
-ps_filt0 <- phyloseq::subset_taxa(ps,
+ps_filt <- phyloseq::subset_taxa(ps,
                                  # remove unclassified sequences
                                  (Kingdom != "Unassigned") &
                                  # remove Chloroplasts and Mitochondria
                                  (Order != "Chloroplast") &
                                  (Family != "Mitochondria")
 )
-
-# Keep taxa present in at least three samples
-keep_prev <- rowSums(otu_table(ps_filt0) > 0) >= 3
-# Keep taxa with at least 10 total reads across all samples
-keep_abund <- taxa_sums(ps_filt0) >= 10
-# Apply conditions
-ps_filt <- prune_taxa(keep_prev & keep_abund, ps_filt0)
-
-# ------ Agglomerate, cutting NA values ------
-
-# tax_glom deletes NA values by default
-ps_genus_short = tax_glom(ps_filt, "Genus")
 
 # ------ Agglomerate, keeping NA values  ------
 
@@ -87,7 +75,6 @@ ps_genus = tax_glom(ps_filt, "Genus")
 # ------ Save ------
 
 saveRDS(ps_filt,        file = "./data/ps_ASV_full.rds")
-saveRDS(ps_genus_short, file = "./data/ps_genus_cut_NA.rds")
 saveRDS(ps_genus,       file = "./data/ps_genus_full.rds")
 
 # remove XS granules
