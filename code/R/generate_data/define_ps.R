@@ -34,6 +34,20 @@ ps_filt <- phyloseq::subset_taxa(ps,
                                  (Family != "Mitochondria")
 )
 
+# ------ Rarefy ------
+
+# define minimum depth to rarefy
+rarefy_level <- min(sample_sums(ps_filt))  # lowest number of ASVs per sample
+
+ps_rarefied <- rarefy_even_depth(
+  ps_filt, rarefy_level, rngseed = 1, replace = FALSE, trimOTUs = TRUE, verbose = TRUE
+)
+
+# ------ Save at ASV level ------
+
+saveRDS(ps_filt,     file = "./data/phyloseq/ps_ASV.rds")
+saveRDS(ps_rarefied, file = "./data/phyloseq/ps_ASV_rarefied.rds")
+
 # ------ Agglomerate, keeping NA values  ------
 
 # If Genus is NA, then replace with higher order
@@ -72,12 +86,10 @@ rm(taxonomy)
 ps_genus = tax_glom(ps_filt, "Genus")
 
 
-# ------ Save ------
+# ------ Save at genus level ------
 
-saveRDS(ps_filt,        file = "./data/phyloseq/ps_ASV_full.rds")
-saveRDS(ps_genus,       file = "./data/phyloseq/ps_genus_full.rds")
-
-# remove XS granules
+# remove floccular granules
 ps_sub <- subset_samples(ps_genus, size.name != "floccular")
-  
-saveRDS(ps_sub, file = "./data/phyloseq/ps_genus_subset.rds")
+
+saveRDS(ps_genus, file = "./data/phyloseq/ps_genus_full.rds")
+saveRDS(ps_sub,   file = "./data/phyloseq/ps_genus_subset.rds")
