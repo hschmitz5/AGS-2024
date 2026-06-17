@@ -39,6 +39,7 @@ ps_filt <- phyloseq::subset_taxa(ps,
 # define minimum depth to rarefy
 rarefy_level <- min(sample_sums(ps_filt))  # lowest number of ASVs per sample
 
+# keep trimOTUs FALSE -- changes the results
 ps_rarefied <- rarefy_even_depth(
   ps_filt, rarefy_level, rngseed = 1, replace = FALSE, trimOTUs = FALSE, verbose = TRUE
 )

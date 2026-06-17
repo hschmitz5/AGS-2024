@@ -12,6 +12,7 @@ rarefy_level <- min(sample_sums(ps_asv))  # lowest number of ASVs per sample
 seeds <- set_names(1:10, paste0("seed_", 1:10))
 
 # apply rarefaction ten times
+# keep trimOTUs FALSE -- changes the results
 ps_rar_list <- map(seeds, ~ rarefy_even_depth(ps_asv, sample.size = rarefy_level,
                                              rngseed = .x, replace = FALSE, trimOTUs = FALSE, verbose = TRUE))
 
