@@ -18,46 +18,16 @@ p_threshold <- 0.05
 
 # ------ Process Data -----
 
-taxonomy <- get_taxonomy(ps)
-
 # define taxa in which at least one sample has abundance > rel_ab_cutoff
 high_ab_taxa <- get_rel(ps) %>%
   filter(Abundance > rel_ab_cutoff) %>%
-  distinct(OTU) %>%
-  pull(OTU)
+  distinct(Genus) %>%
+  pull(Genus)
 
-# load differential abundance data
-output <- readRDS(ancom_fname)
-
-# At least one samples must be significant and pass sensitivity analysis
-DA_taxa <- output$res %>%
-  rename(OTU = taxon) %>%
-  filter(OTU %in% high_ab_taxa) %>%
-  # Combines diff_size* and passed_ss* together
-  pivot_longer(
-    cols = matches("q_size\\.name|passed_ss_size\\.name"),
-    names_to = c(".value","size"),
-    names_pattern = "(q|passed_ss)_size\\.name(.*)"
-  ) %>%
-  filter(q < p_threshold & passed_ss == TRUE) %>%   
-  distinct(OTU) %>%
-  pull(OTU)
-
-# Define matrix of log-fold change data per size
-data_mat <- output$res %>% 
-  rename(OTU = taxon) %>%
-  left_join(., taxonomy, by = "OTU") %>%
-  # Keep DA_taxa
-  filter(OTU %in% DA_taxa) %>%
-  # change value to zero if not significant
-  mutate(
-    M   = ifelse(q_size.nameM   < p_threshold & passed_ss_size.nameM,   lfc_size.nameM, 0),
-    L   = ifelse(q_size.nameL   < p_threshold & passed_ss_size.nameL,   lfc_size.nameL, 0),
-    XL  = ifelse(q_size.nameXL  < p_threshold & passed_ss_size.nameXL,  lfc_size.nameXL, 0),
-    XXL = ifelse(q_size.nameXXL < p_threshold & passed_ss_size.nameXXL, lfc_size.nameXXL, 0)
-  ) %>%
-  dplyr::select(Genus, M, L, XL, XXL) %>% # Species - new name
-  rename_with(~ paste0(., "-S"), c("M", "L", "XL", "XXL")) %>%
+data_mat <- readRDS("./data/DA/DA_genus_processed.rds") %>%
+  filter(Genus %in% high_ab_taxa) %>%
+  dplyr::select(-robust) %>%
+  pivot_wider(names_from = size, values_from = lfc) %>%
   column_to_rownames(var = "Genus") %>%
   as.matrix()
 
