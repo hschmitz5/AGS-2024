@@ -45,6 +45,10 @@ m_df <- rel_df %>%
   rownames_to_column(var = "Genus") %>%
   get_metabolism() 
 
+# DA Taxa
+DA_genera <- readRDS("./data/DA/DA_genus_processed.rds") %>%
+  pull(Genus) %>%
+  unique()
 
 #### ---- Plotting ------
 
@@ -97,10 +101,16 @@ split = rep(1:n_sizes, each = n_replicates)
 
 # Labels
 row_labels <- rownames(log_mat)
-# italicize species + _g, but not _f/_o/_c/_p
+# italicize classified genera
 italic_rows <- !grepl("^(Unk|midas)", row_labels) 
+# bold DA taxa
+bold_rows <- row_labels %in% DA_genera
 # Apply
-row_fontface <- ifelse(italic_rows, "italic", "plain")
+row_fontface <- ifelse(
+  bold_rows & italic_rows, "bold.italic",
+  ifelse(bold_rows, "bold",
+         ifelse(italic_rows, "italic", "plain"))
+)
 
 # Legend Colors
 ht_colors <- met.brewer(taxa_pal, type = "continuous")
