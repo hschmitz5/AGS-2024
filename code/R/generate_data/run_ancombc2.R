@@ -41,9 +41,6 @@ process_DA <- function(output, value_col) {
     rename(metab = taxon)
   
   df_lfc <- res_prim %>%
-    # filter for values that are differentially abundant (TRUE)
-    dplyr::filter(diff_size.nameM == 1 | diff_size.nameL == 1 |
-                    diff_size.nameXL == 1 | diff_size.nameXXL == 1) %>%
     # set non-DA values to zero
     dplyr::mutate(M = ifelse(diff_size.nameM == 1, 
                              round(lfc_size.nameM, 2), 0),
@@ -61,7 +58,7 @@ process_DA <- function(output, value_col) {
     # filter for values that are differentially abundant (TRUE)
     dplyr::filter(diff_size.nameM == 1 | diff_size.nameL == 1 |
                     diff_size.nameXL == 1 | diff_size.nameXXL == 1) %>%
-    # set fontface to bold for values that passed sensitivity analysis
+    # true if robust (is differentially abundant and passed sensitivity analysis)
     dplyr::mutate(M = ifelse(diff_robust_size.nameM == 1, 
                              TRUE, FALSE),
                   L = ifelse(diff_robust_size.nameL == 1, 
@@ -82,8 +79,11 @@ process_DA <- function(output, value_col) {
   return(df)
 }
 
-lfc_P <- process_DA(output_P, "Positive") 
-lfc_PV <- process_DA(output_PV, "Positive + Variable")
+lfc_P <- process_DA(output_P, "Positive") %>%
+  filter(!is.na(robust))
+
+lfc_PV <- process_DA(output_PV, "Positive + Variable") 
+
 lfc_full <- bind_rows(lfc_P, lfc_PV) 
 
 saveRDS(lfc_full, file = "./data/DA_metab_processed.rds")
