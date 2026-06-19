@@ -27,6 +27,7 @@ max_y = ceiling(max(DA_df$lfc))
 
 p1 <- ggplot(DA_df, aes(x = size, y = lfc, fill = metab_val)) +
   geom_col(position = "dodge", width = 0.6) +
+  geom_hline(yintercept = 0, linewidth = 0.5, color = "darkgray") +  # bold y = 0
   facet_wrap(~metab, scales = "fixed", ncol = 1) +
   ylim(min_y, max_y) +
   labs(
