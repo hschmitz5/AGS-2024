@@ -66,7 +66,7 @@ p_sub <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
     y = "Modulus (Pa)"
   ) +
   scale_fill_manual(
-    values = c("peachpuff4", "peachpuff")
+    values = c("plum4", "lightgray")
   ) +
   theme_minimal(base_size = 12) +
   theme(
