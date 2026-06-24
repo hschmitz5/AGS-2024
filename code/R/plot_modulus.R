@@ -48,10 +48,10 @@ p <- ggplot(modulus, aes(x = freq_rad, y = avg, color = size)) +
     y = "Modulus (Pa)",
   ) +
   theme_minimal(base_size = 12) +
-  theme(legend.position = "bottom")
+  theme(legend.position = "right")
 
 fname_out <- "./figures/moduli.png"
-ggsave(fname_out, plot = p, width = 6.5, height = 3, dpi = 300)
+ggsave(fname_out, plot = p, width = 6.5, height = 2.5, dpi = 300)
 
 
 p_sub <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
@@ -75,4 +75,4 @@ p_sub <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
   )
 
 fname_out <- "./figures/moduli_subset.png"
-ggsave(fname_out, plot = p_sub, width = 6.5, height = 3, dpi = 300)
+ggsave(fname_out, plot = p_sub, width = 6.5, height = 2.5, dpi = 300)
