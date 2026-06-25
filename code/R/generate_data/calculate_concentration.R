@@ -34,15 +34,14 @@ df <- read_excel(fname_in, sheet = sheet_name, skip = 1) %>%
   mutate(size = factor(name, levels = sz$name)) %>%
   select(-name)
 
-# define samples
+# define sample data (excludes standards)
 sam <- df %>%
-  group_by(dataset) %>%
   filter(is.na(C)) %>%
   select(-C) %>%
   # initialize data 
   mutate(
     C0 = NA_real_,
-    C_VSS = NA_real_)
+    C_VSS = NA_real_) 
 
 # set poly_degree based on sheet_name
 poly_degree <- switch(sheet_name,
@@ -111,10 +110,13 @@ for (d_set in unique(df$dataset)) {
   ggsave(fit_plot, height = 2.5, width = 6, dpi = 600)
 }
 
-# save the sample data
-saveRDS(sam, file = paste0("./data/EPS/",sheet_name,"_conc.rds"))
+sam_output <- sam %>%
+  dplyr::select(size, replicate, extract, C_VSS)
 
-sam_sort <- sam %>%
+# save the sample data
+saveRDS(sam_output, file = paste0("./data/EPS/",sheet_name,"_conc.rds"))
+
+sam_sort <- sam_output %>%
   arrange(extract)
 
 write_xlsx(sam_sort, path = paste0("./data/EPS/",sheet_name,"_conc.xlsx"))
