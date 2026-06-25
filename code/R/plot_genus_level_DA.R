@@ -118,7 +118,7 @@ ht <- Heatmap(
   column_names_gp = gpar(fontsize = col_fontsize)
 )
 
-fname  <- "./figures/DA_heatmap.png"
+fname  <- "./figures/genus_level_DA.png"
 # Draw combined heatmap
 png(fname,
     width = 7,  # width in inches; can adjust

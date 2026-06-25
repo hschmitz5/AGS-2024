@@ -63,7 +63,7 @@ p <- p1 + p2 +
         legend.position = "bottom") 
   
 # Save plot
-fname <- "./figures/metabolism.png"
+fname <- "./figures/functional_group_abundance.png"
 ggsave(fname, plot = p, width = 6.5, height = 7.5, dpi = 300)
 
 
@@ -88,5 +88,5 @@ if (write2excel == 1) {
     arrange(Genus)
   
   library(writexl)
-  write_xlsx(full_df, path = "./data/rel_ab_metab.xlsx")
+  write_xlsx(full_df, path = "./data/functional_rel_ab.xlsx")
 }

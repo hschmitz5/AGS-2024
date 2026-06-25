@@ -2,9 +2,6 @@ rm(list = ls())
 library(ComplexHeatmap)
 source("./code/R/01_load_ps.R")
 
-# Figure output location
-fname_rel <- "./figures/rel_ab_heatmap.png"
-
 # number of rows to show
 n_show <- 30
 
@@ -144,6 +141,9 @@ ht <- Heatmap(
   row_names_gp = gpar(fontsize = row_fontsize, fontface = row_fontface),
   column_names_gp = gpar(fontsize = col_fontsize)
 )
+
+# Figure output location
+fname_rel <- "./figures/genus_level_rel_ab.png"
 
 # Draw combined heatmap
 png(fname_rel,
