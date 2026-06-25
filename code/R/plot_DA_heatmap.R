@@ -24,21 +24,21 @@ n_show <- 30
 data_df <- readRDS("./data/DA/DA_genus_processed.rds") 
 
 # Genera mapped in Relative Abundance
-# rel_names <- get_rel_wide(ps) %>%
-#   # Arrange taxa from largest to smallest abundance
-#   mutate(row_sum = rowSums(.)) %>%
-#   arrange(desc(row_sum)) %>%
-#   # Keep the top n_show
-#   head(., n = n_show) %>%
-#   rownames()
-
-# Names of genera with metabolism annotation
-m_names <- get_metabolism(data_df) %>%
-  filter(if_any(everything(), ~ !is.na(.))) %>%
+rel_names <- get_rel_wide(ps) %>%
+  # Arrange taxa from largest to smallest abundance
+  mutate(row_sum = rowSums(.)) %>%
+  arrange(desc(row_sum)) %>%
+  # Keep the top n_show
+  head(., n = n_show) %>%
   rownames()
 
+# Names of genera with metabolism annotation
+# m_names <- get_metabolism(data_df) %>%
+#   filter(if_any(everything(), ~ !is.na(.))) %>%
+#   rownames()
+
 data_mat <- data_df %>%
-  filter(Genus %in% m_names) %>%
+  filter(Genus %in% rel_names) %>%
   dplyr::select(-robust) %>%
   pivot_wider(names_from = size, values_from = lfc) %>%
   column_to_rownames(var = "Genus") %>%
@@ -122,7 +122,7 @@ fname  <- "./figures/DA_heatmap.png"
 # Draw combined heatmap
 png(fname,
     width = 7,  # width in inches; can adjust
-    height = 4, # height in inches; can adjust
+    height = 6.5, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht, heatmap_legend_side = "top") #, annotation_legend_side = "top") 
 draw(lgd, x = unit(0.66, "npc"), y = unit(0.98, "npc"), just = c("right", "top"))
