@@ -32,11 +32,10 @@ df <- bind_rows(
     ) 
 
 # Calculate PN/PS
-df_wide <- PN %>% 
-  rename(PN_avg = avg, PN_sd = sd) %>%
-  left_join(
-    PS %>% rename(PS_avg = avg, PS_sd  = sd),
-    by = c("size", "extract")
+df_wide <- left_join(
+  PN %>% select(size, extract, PN_avg = avg, PN_sd = sd), 
+  PS %>% select(size, extract, PS_avg = avg, PS_sd = sd), 
+  by = c("size", "extract")
   ) %>%
   mutate(
     PNPS = PN_avg/PS_avg,
