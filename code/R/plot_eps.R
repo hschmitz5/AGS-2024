@@ -26,7 +26,6 @@ df <- bind_rows(
   Polysaccharide = PS,
   .id = "assay"
   ) %>%
-  group_by(size, extract) %>%
   mutate(
     extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
     assay = factor(assay, levels = c("Protein", "Polysaccharide"))
