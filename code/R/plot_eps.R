@@ -15,46 +15,43 @@ group_data <- function(fname) {
       sd = sd(C_VSS),
       .groups = "drop"
     )
-}
+  }
 # Apply function to each assay
 PN <- group_data(fname_pn) 
 PS <- group_data(fname_polys)
 
 # Combine into single data frame
 df <- bind_rows(
-    PN = PN,
-    PS = PS,
-    .id = "assay"
+  Protein = PN,
+  Polysaccharide = PS,
+  .id = "assay"
   ) %>%
+  group_by(size, extract) %>%
   mutate(
-    extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound")
-  )
+    extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
+    assay = factor(assay, levels = c("Protein", "Polysaccharide"))
+    ) 
 
 # Calculate PN/PS
-df_wide <- df %>%
-  pivot_wider(
-    names_from = assay,
-    values_from = c(avg, sd),
-    names_glue = "{assay}_{.value}"
+df_wide <- PN %>% 
+  rename(PN_avg = avg, PN_sd = sd) %>%
+  left_join(
+    PS %>% rename(PS_avg = avg, PS_sd  = sd),
+    by = c("size", "extract")
   ) %>%
   mutate(
     PNPS = PN_avg/PS_avg,
-    total_avg = PN_avg + PS_avg
+    total_avg = PN_avg + PS_avg,
+    extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound")
   )
 
 tot <- df_wide %>%
-  transmute(assay = "total", size, extract, avg = total_avg)
+  transmute(assay = "Total EPS", size, extract, avg = total_avg) 
 
 # Determine maximum avg + sd
 max_y <- ceiling(
   max(df$avg + df$sd)
 )
-
-# Get rid of acronyms
-df <- df %>%
-  mutate(
-    assay = recode(assay, "PN" = "protein (PN)", "PS" = "polysaccharide (PS)")
-  )
 
 # -------------------------------
 
@@ -78,12 +75,12 @@ p <- ggplot(data = df, aes(x = size, y = avg, fill = assay)) +
   ) +
   scale_fill_manual(
     values = c(
-      "protein (PN)" = "gray",
-      "polysaccharide (PS)" = "lightblue"
+      "Protein" = "gray",
+      "Polysaccharide" = "lightblue"
     )
   ) +
   scale_color_manual(
-    values = c("total" = "black")
+    values = c("Total EPS" = "black")
   ) +
   theme_minimal(base_size = 12) +
   theme(
@@ -115,5 +112,5 @@ annot <- ggplot(data = df_wide) +
 p2 <- p / annot +
   plot_layout(heights = c(4, 1)) 
 
-fname_out <- "./figures/EPS/EPS.png"
+fname_out <- "./figures/EPS.png"
 ggsave(fname_out, plot = p2, width = 8, height = 4, dpi = 600)
