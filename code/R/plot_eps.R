@@ -39,12 +39,9 @@ df_wide <- left_join(
   ) %>%
   mutate(
     PNPS = PN_avg/PS_avg,
-    total_avg = PN_avg + PS_avg,
+    total = PN_avg + PS_avg,
     extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound")
   )
-
-tot <- df_wide %>%
-  transmute(assay = "Total EPS", size, extract, avg = total_avg) 
 
 # Determine maximum avg + sd
 max_y <- ceiling(
@@ -62,7 +59,10 @@ p <- ggplot(data = df, aes(x = size, y = avg, fill = assay)) +
     position = position_dodge(width = 0.6),
     width = 0.2
   ) +
-  geom_point(data = tot, aes(x = size, y = avg, color = assay), shape = 20) +
+  # Total EPS (use inherit.aes = FALSE so it does not expect assay to be defined)
+  geom_point(
+    data = df_wide, aes(x = size, y = total, color = "Total EPS"), 
+    inherit.aes = FALSE, shape = 20) +
   facet_wrap(~extract, nrow=1, strip.position = "top") +
   ylim(0, max_y) +
   labs(
