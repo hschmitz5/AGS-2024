@@ -85,8 +85,8 @@ p <- ggplot(data = df, aes(x = size, y = avg, fill = assay)) +
   theme_minimal(base_size = 12) +
   theme(
     strip.background = element_rect(
-      fill = "white",
-      colour = "lightgray"
+      fill = "white",      # facet label fill
+      colour = "lightgray" # facet label outline
     )
   ) +
   guides(
