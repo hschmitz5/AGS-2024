@@ -53,7 +53,19 @@ PNPS <- df_wide %>%
     ) 
 
 # Determine maximum avg + sd
-max_y <- ceiling(max(df$avg + df$sd))
+max_y1 <- df %>%
+  filter(assay != "PN + PS") %>%
+  summarise(max_y = max(avg + sd)) %>%
+  pull(max_y)
+
+max_y2 <- df %>%
+  filter(assay == "PN + PS") %>%
+  summarise(max_y = max(avg)) %>%
+  pull(max_y)
+
+max_y <- ceiling(
+  max(max_y1, max_y2)
+  )
 
 # -------------------------------
 
@@ -69,45 +81,50 @@ p <- ggplot(data = df, aes(x = size, y = avg, fill = assay)) +
   facet_wrap(~extract) + 
   ylim(0, max_y) +
   labs(
-    x = "Size",
     y = expression(paste(mu, "g/mgVSS")),
-    fill = NULL, # legend titles
-    color = NULL 
+    x = NULL,
+    fill = NULL # legend titles
   ) +
   scale_fill_manual(
     values = c(
-      "Polysaccharide (PS)" = "lavenderblush2",
+      "Polysaccharide (PS)" = "lightsalmon2",
       "Protein (PN)"        = "lightblue",
-      "PN + PS"      = "gray"
+      "PN + PS"      = "steelblue" 
     )
   ) +
   theme_classic(base_size = 12) +
   theme(
     strip.background = element_rect(
       colour = NA # facet label outline
-    )
+    ),
+    axis.line.x = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
   ) 
 
-annot <- ggplot(data = PNPS) +
-  geom_tile(aes(x = size, y = 1, fill = round(avg,1))) +
-  geom_text(aes(x = size, y = 1, label = round(avg,1))) +
-  scale_fill_gradient(low="white", high="lightgray") +
+annot <- ggplot(data = PNPS, aes(x = size, y = avg, fill = "PN/PS")) +
+  geom_col(position = "dodge", width = 0.5) +
   facet_wrap(~extract) +
+  scale_y_continuous(
+    breaks = c(0, 2, 4)
+    ) +
   labs(
-    y = expression(frac(PN,PS))
+    x = "Size",
+    y = NULL, 
+    fill = NULL
+    ) +
+  scale_fill_manual(
+    values = "lightgray",
+    labels = expression(frac(PN, PS))
   ) +
   theme_classic(base_size = 12) +
   theme(
     strip.text  = element_blank(),
-    legend.position = "none",
-    axis.title.y = element_text(angle = 0, hjust = 0.5),
-    axis.title.x  = element_blank(),
-    axis.text = element_blank(),
-    axis.ticks  = element_blank()
+    legend.justification = "left"
   )
 
 p2 <- p / annot +
-  plot_layout(heights = c(3, 1))
+  plot_layout(heights = c(4, 1.5))
 
 fname_out <- "./figures/EPS.png"
 ggsave(fname_out, plot = p2, width = 6.5, height = 3, dpi = 300)
