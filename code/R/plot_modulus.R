@@ -47,8 +47,13 @@ p <- ggplot(modulus, aes(x = freq_rad, y = avg, color = size)) +
     x = "Deformation Frequency (rad/s)",
     y = "Modulus (Pa)",
   ) +
-  theme_minimal(base_size = 12) +
-  theme(legend.position = "right")
+  theme_classic(base_size = 12) +
+  theme(
+    legend.position = "right",
+    strip.background = element_rect(
+      colour = NA # facet label outline
+      )
+    )
 
 fname_out <- "./figures/moduli.png"
 ggsave(fname_out, plot = p, width = 6.5, height = 2.25, dpi = 300)
@@ -68,7 +73,7 @@ p_sub <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
   scale_fill_manual(
     values = c("plum4", "lightgray")
   ) +
-  theme_minimal(base_size = 12) +
+  theme_classic(base_size = 12) +
   theme(
     legend.title = element_blank()
   )

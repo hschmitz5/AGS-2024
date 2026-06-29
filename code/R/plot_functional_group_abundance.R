@@ -58,9 +58,14 @@ p <- p1 + p2 +
     values = c("Positive" = "steelblue",
                "Positive + Variable" = "lightgray")
   ) &
-  theme_minimal(base_size = 12) +
-  theme(plot.title = element_text(hjust = 0.5),
-        legend.position = "bottom") 
+  theme_classic(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5), # center title
+    legend.position = "bottom",
+    strip.background = element_rect(
+      colour = NA # facet label outline
+      )
+    ) 
   
 # Save plot
 fname <- "./figures/functional_group_abundance.png"

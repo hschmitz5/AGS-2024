@@ -1,8 +1,6 @@
-source("./code/R/00_setup.R")
-source("./code/R/01_load_data.R")
+source("./code/R/01_load_ps.R")
 
 # Data -------------------------------------------------------------
-fname <- "./figures/mass-percent.png"
 
 labels <- c("< 0.21", "0.21 - 0.43", "0.43 - 0.60", "0.60 - 1.4", 
             "1.4 - 2.0", "2.0 - 2.8", "2.8 - 4.0", "> 4.0")
@@ -40,7 +38,7 @@ p <- ggplot(df) +
     y = "Mass Percentage [%]",
     fill = ""
   ) +
-  theme_minimal(base_size = 14) +
+  theme_classic(base_size = 14) +
   theme(
     legend.position = "top",
     axis.text.x = element_text(angle = 45, hjust = 1),
@@ -52,6 +50,7 @@ p <- ggplot(df) +
 
 # Save figure -------------------------------------------------------
 
+fname <- "./figures/mass-percent.png"
 ggsave(fname, p, width = 6, height = 5, dpi = 300)
 
 # Display

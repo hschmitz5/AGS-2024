@@ -40,7 +40,7 @@ for (seed_num in 1:10) {
     scale_color_manual(values = cols) +
     scale_fill_manual(values = cols) +
     labs(shape = "Size", color = "Size", fill = "Size") +
-    theme_minimal(base_size = 12) +
+    theme_classic(base_size = 12) +
     theme(
       plot.title = element_text(size = 12)
     ) 
