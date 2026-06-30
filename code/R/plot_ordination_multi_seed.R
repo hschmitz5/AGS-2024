@@ -2,18 +2,24 @@ rm(list = ls())
 source("./code/R/01_load_ps.R")
 
 # load phyloseq object for all sample sizes
-ps_asv <- readRDS("./data/phyloseq/ps_ASV.rds") 
+ps <- readRDS("./data/phyloseq/ps_ASV.rds") 
+
+# UniFrac expects a binary tree (each node to have 2 descendants)
+if (ape::is.binary(phy_tree(ps)) == "FALSE") {
+  phy_tree(ps) <- ape::multi2di(phy_tree(ps))
+  print("resolved polytomies")
+}
 
 # ------ Rarefy x 10 ------
 
 # define minimum depth to rarefy
-rarefy_level <- min(sample_sums(ps_asv))  # lowest number of ASVs per sample
+rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
 
 seeds <- set_names(1:10, paste0("seed_", 1:10))
 
 # apply rarefaction ten times
 # keep trimOTUs FALSE -- changes the results
-ps_rar_list <- map(seeds, ~ rarefy_even_depth(ps_asv, sample.size = rarefy_level,
+ps_rar_list <- map(seeds, ~ rarefy_even_depth(ps, sample.size = rarefy_level,
                                              rngseed = .x, replace = FALSE, trimOTUs = FALSE, verbose = TRUE))
 
 

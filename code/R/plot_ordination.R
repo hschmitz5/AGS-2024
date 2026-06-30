@@ -4,6 +4,12 @@ source("./code/R/01_load_ps.R")
 # load phyloseq object for all sample sizes
 ps <- readRDS("./data/phyloseq/ps_ASV_rarefied.rds") 
 
+# UniFrac expects a binary tree (each node to have 2 descendants)
+if (ape::is.binary(phy_tree(ps)) == "FALSE") {
+  phy_tree(ps) <- ape::multi2di(phy_tree(ps))
+  print("resolved polytomies")
+}
+
 # ps: all sample groups
 ps.ord <- ordinate(ps, "PCoA", "wunifrac")
 
