@@ -73,8 +73,11 @@ res <- adonis2(
 
 # ------ Plot ------
 
+sizes <- c("Floccular", "S", "M", "L", "XL", "XXL")
+
 df_long <- df_R2 |>
-  pivot_longer(!sz_1, names_to = "sz_2", values_to = "R2")
+  pivot_longer(!sz_1, names_to = "sz_2", values_to = "R2") %>%
+  mutate(sz_1 = recode(sz_1, "floccular" = "Floccular"))
 
 df_long$sz_1 <- factor(df_long$sz_1, levels = rev(sizes))
 df_long$sz_2 <- factor(df_long$sz_2, levels = sizes)
@@ -95,5 +98,5 @@ p <- ggplot(data = df_long, aes(x = sz_2, y = sz_1, fill = R2)) +
   theme_classic(base_size = 12) +
   theme(legend.position = "none")
 
-fname <- "./figures/adonis.png"
+fname <- "./figures/ADONIS_R2.png"
 ggsave(fname, plot = p, width = 6.5, height = 3, dpi = 300)
