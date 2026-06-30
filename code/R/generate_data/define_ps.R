@@ -39,14 +39,17 @@ ps_filt <- phyloseq::subset_taxa(ps,
 # define minimum depth to rarefy
 rarefy_level <- min(sample_sums(ps_filt))  # lowest number of ASVs per sample
 
-ps_rarefied <- rarefy_even_depth(
+ps_rare <- rarefy_even_depth(
   ps_filt, rarefy_level, rngseed = 1, replace = FALSE, trimOTUs = TRUE, verbose = TRUE
 )
 
+# Prune the tree to match the remaining taxa
+ps_rare <- prune_taxa(taxa_names(ps_rare), ps_rare)
+
 # ------ Save at ASV level ------
 
-saveRDS(ps_filt,     file = "./data/phyloseq/ps_ASV.rds")
-saveRDS(ps_rarefied, file = "./data/phyloseq/ps_ASV_rarefied.rds")
+saveRDS(ps_filt, file = "./data/phyloseq/ps_ASV.rds")
+saveRDS(ps_rare, file = "./data/phyloseq/ps_ASV_rarefied.rds")
 
 # ------ Agglomerate, keeping NA values  ------
 
