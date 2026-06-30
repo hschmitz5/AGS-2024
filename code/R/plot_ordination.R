@@ -32,7 +32,7 @@ p <- plot_ordination(ps, ps.ord, shape = "size.name", color="size.name") +
   ) 
 
 fname_ord <- "./figures/ordination-PCoA-ASV.png"
-ggsave(fname_ord, plot = p, width = 6.5, height = 3, dpi = 600)
+ggsave(fname_ord, plot = p, width = 6.5, height = 3, dpi = 300)
 
 
 # For correlation
