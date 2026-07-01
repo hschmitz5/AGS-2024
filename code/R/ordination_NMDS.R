@@ -27,20 +27,7 @@ nmds_df <- scores(nmds) %>%
   as_tibble(rownames = "SampleID") %>%
   left_join(., metadata, by = "SampleID")
 
-
-# ------ Correlation ------
-
-size_cor <- nmds_df %>%
-  group_by(size.name, size.midpoint) %>%
-  # correlate mean of Axis 1
-  summarize(
-    axis1_mean = mean(NMDS1),
-    .groups = "drop"
-  )
-
-res <- cor.test(size_cor$axis1_mean, size_cor$size.midpoint, method = "spearman")
-
-print(res$p.value)
+stress_text <- paste0("2D stress: ",round(nmds$stress,2))
 
 # ------ Plot ------
 
@@ -54,6 +41,8 @@ cols <- c("gray", met.brewer(size_pal, n_sizes))
 p <- ggplot(nmds_df, aes(NMDS1, NMDS2, color = size.name, shape = size.name)) +
   geom_point() +
   geom_polygon(alpha = 0.5, aes(fill = size.name)) +
+  # annotate("text", x = Inf, y = -Inf, label = stress_text,
+  #          hjust = 1.1, vjust = -0.5) +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = shapes) +
   scale_fill_manual(values = cols) +
