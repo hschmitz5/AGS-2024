@@ -27,6 +27,21 @@ nmds_df <- scores(nmds) %>%
   as_tibble(rownames = "SampleID") %>%
   left_join(., metadata, by = "SampleID")
 
+
+# ------ Correlation ------
+
+size_cor <- nmds_df %>%
+  group_by(size.name, size.midpoint) %>%
+  # correlate mean of Axis 1
+  summarize(
+    axis1_mean = mean(NMDS1),
+    .groups = "drop"
+  )
+
+res <- cor.test(size_cor$axis1_mean, size_cor$size.midpoint, method = "spearman")
+
+print(res$p.value)
+
 # ------ Plot ------
 
 # symbol
