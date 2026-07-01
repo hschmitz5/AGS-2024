@@ -1,19 +1,19 @@
 rm(list = ls())
 source("./code/R/01_load_ps.R")
 
-dist_method <- "bray" # "wunifrac"
+dist_method <- "wunifrac" # "bray"
 
 # load phyloseq object for all sample sizes
 ps <- readRDS("./data/phyloseq/ps_ASV_rarefied.rds") 
 
-# UniFrac expects a binary tree (each node to have 2 descendants)
+# Converting tree to binary resolves tip number error
 # if (ape::is.binary(phy_tree(ps)) == "FALSE") {
 #   phy_tree(ps) <- ape::multi2di(phy_tree(ps))
 #   print("resolved polytomies")
 # }
 
 # ps: all sample groups
-ps.ord <- ordinate(ps, "PCoA", "bray") 
+ps.ord <- ordinate(ps, "PCoA", dist_method) 
 
 # ------ Correlation ------
 
@@ -51,5 +51,5 @@ p <- plot_ordination(ps, ps.ord, color="size.name", shape = "size.name") +
   labs(shape = "Size", color = "Size", fill = "Size") +
   theme_classic(base_size = 12) 
 
-fname_ord <- paste0("./figures/ordination_",dist_method,".png")
+fname_ord <- paste0("./figures/ordination_PCoA_", dist_method,".png")
 ggsave(fname_ord, plot = p, width = 6.5, height = 3, dpi = 300)
