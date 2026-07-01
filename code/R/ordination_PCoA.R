@@ -1,6 +1,8 @@
 rm(list = ls())
 source("./code/R/01_load_ps.R")
 
+dist_method <- "bray" # "wunifrac"
+
 # load phyloseq object for all sample sizes
 ps <- readRDS("./data/phyloseq/ps_ASV_rarefied.rds") 
 
@@ -11,7 +13,7 @@ ps <- readRDS("./data/phyloseq/ps_ASV_rarefied.rds")
 # }
 
 # ps: all sample groups
-ps.ord <- ordinate(ps, "PCoA", "wunifrac")
+ps.ord <- ordinate(ps, "PCoA", "bray") 
 
 # ------ Correlation ------
 
@@ -41,16 +43,13 @@ shapes <- c(16, 17, 15, 18, 3, 7)
 # colors
 cols <- c("gray", met.brewer(size_pal, n_sizes))
 
-p <- plot_ordination(ps, ps.ord, shape = "size.name", color="size.name") +
+p <- plot_ordination(ps, ps.ord, color="size.name", shape = "size.name") +
   geom_polygon(alpha = 0.5, aes(fill = size.name)) +
-  scale_shape_manual(values = shapes) +
   scale_color_manual(values = cols) +
+  scale_shape_manual(values = shapes) +
   scale_fill_manual(values = cols) +
   labs(shape = "Size", color = "Size", fill = "Size") +
-  theme_classic(base_size = 12) +
-  theme(
-    plot.title = element_text(size = 12)
-  ) 
+  theme_classic(base_size = 12) 
 
-fname_ord <- "./figures/ordination-PCoA-ASV.png"
+fname_ord <- paste0("./figures/ordination_",dist_method,".png")
 ggsave(fname_ord, plot = p, width = 6.5, height = 3, dpi = 300)
