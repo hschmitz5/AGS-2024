@@ -5,13 +5,33 @@ source("./code/R/01_load_ps.R")
 ps <- readRDS("./data/phyloseq/ps_ASV_rarefied.rds") 
 
 # UniFrac expects a binary tree (each node to have 2 descendants)
-if (ape::is.binary(phy_tree(ps)) == "FALSE") {
-  phy_tree(ps) <- ape::multi2di(phy_tree(ps))
-  print("resolved polytomies")
-}
+# if (ape::is.binary(phy_tree(ps)) == "FALSE") {
+#   phy_tree(ps) <- ape::multi2di(phy_tree(ps))
+#   print("resolved polytomies")
+# }
 
 # ps: all sample groups
 ps.ord <- ordinate(ps, "PCoA", "wunifrac")
+
+# ------ Correlation ------
+
+# For correlation
+metadata <- get_metadata(ps) 
+
+pcoa <- data.frame(axis1 = ps.ord$vectors[, "Axis.1"]) %>%
+  rownames_to_column(var = "Sample") %>%
+  left_join(., metadata, by = "Sample") %>%
+  group_by(size.name, size.midpoint) %>%
+  summarize(
+    axis1_mean = mean(axis1),
+    .groups = "drop"
+  )
+
+res <- cor.test(pcoa$axis1_mean, pcoa$size.midpoint, method = "spearman")
+
+print(res$p.value)
+
+# ------ Plot ------
 
 # symbol
 # 16 = filled circle, 17 = triangle, 15 = square, 18 = diamond, etc.
@@ -33,16 +53,3 @@ p <- plot_ordination(ps, ps.ord, shape = "size.name", color="size.name") +
 
 fname_ord <- "./figures/ordination-PCoA-ASV.png"
 ggsave(fname_ord, plot = p, width = 6.5, height = 3, dpi = 300)
-
-
-# For correlation
-metadata <- get_metadata(ps) 
-
-pcoa <- data.frame(axis1 = ps.ord$vectors[, "Axis.1"]) %>%
-  rownames_to_column(var = "Sample") %>%
-  left_join(., metadata, by = "Sample") %>%
-  arrange(size.mm)
-
-res <- cor.test(pcoa$axis1, pcoa$size.midpoint, method = "spearman")
-
-print(res$p.value)
