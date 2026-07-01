@@ -27,8 +27,9 @@ overall_res <- adonis2(
   rownames_to_column(var = "Data")
 
 # Want Insignificant 
-bd <- betadisper(dist_matrix, metadata$size.name)
-overall_bd <- anova(bd)
+overall_bd <- anova(
+  betadisper(dist_matrix, metadata$size.name)
+  )
 
 # ------ Pairwise Results ------
 
@@ -38,8 +39,8 @@ all_combos <- combn(sizes, 2, simplify = FALSE)
 
 # Initialize empty data frame
 num_rows <- length(all_combos)
-df <- data.frame(matrix(NA, nrow = num_rows, ncol = 4))
-colnames(df) <- c("sz_1", "sz_2", "R2", "p_value")
+df <- data.frame(matrix(NA, nrow = num_rows, ncol = 5))
+colnames(df) <- c("sz_1", "sz_2", "R2", "p_value", "bd_pval")
 
 for (i in seq_along(all_combos)) {
   
@@ -61,12 +62,18 @@ for (i in seq_along(all_combos)) {
     data = meta_sub,
     permutations = 719
   )
+  
+  # Want Insignificant 
+  bd_res <- anova(
+    betadisper(dist_matrix, meta_sub$size.name)
+    )
 
   df[i, ] <- tibble(
     sz_1 = sample_pair[1],
     sz_2 = sample_pair[2],
     R2 = res$R2[1],
-    p_value = res$`Pr(>F)`[1]
+    p_value = res$`Pr(>F)`[1],
+    bd_pval = bd_res$'Pr(>F)'[1]
   )
 }
 
@@ -76,6 +83,13 @@ df_p <- df %>%
   pivot_wider(
     names_from = sz_2,
     values_from = p_value
+  ) 
+
+df_bd <- df %>%
+  dplyr::select(sz_1, sz_2, bd_pval) %>%
+  pivot_wider(
+    names_from = sz_2,
+    values_from = bd_pval
   ) 
 
 df_R2 <- df %>%
@@ -91,6 +105,7 @@ fname_out <- "./data/ADONIS_Bray.xlsx"
 write_xlsx(
   list(
     p_values = df_p,
+    bd_pvalues = df_bd,
     R2 = df_R2,
     overall = overall_res,
     bd = overall_bd
