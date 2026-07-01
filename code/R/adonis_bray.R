@@ -140,3 +140,13 @@ p <- ggplot(data = df_long, aes(x = sz_2, y = sz_1, fill = R2)) +
 
 fname <- "./figures/ADONIS_Bray_R2.png"
 ggsave(fname, plot = p, width = 6.5, height = 3, dpi = 300)
+
+# ------ Look at distance matrix ------
+
+# For ordering
+sam_name <- c("20A", "20B", "20C", "14A", "14B", "14C", "10A", "10B", "10C",
+              "7A", "7B", "7C", "5A", "5B", "5C")
+
+dist_mat <- as.matrix(dist_matrix)
+dist_mat <- dist_mat[sam_name, sam_name] # order data
+dist_tbl <- as_tibble(dist_mat, rownames = "sample") 
