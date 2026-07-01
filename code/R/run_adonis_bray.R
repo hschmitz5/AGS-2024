@@ -16,6 +16,7 @@ metadata <- data.frame(sample_data(ps))
 # rows are samples, columns are OTUs
 otu_matrix <- data.frame(t(otu_table(ps)))
 
+set.seed(1)
 dist_matrix <- avgdist(otu_matrix, sample = rarefy_level, iterations = 10, dmethod = "bray")
 
 overall_res <- adonis2(

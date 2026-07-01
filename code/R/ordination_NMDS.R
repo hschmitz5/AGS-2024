@@ -17,9 +17,10 @@ otu_matrix <- data.frame(t(otu_table(ps)))
 # define minimum depth to rarefy
 rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
 
+set.seed(1)
 dist_matrix <- avgdist(otu_matrix, sample = rarefy_level, iterations = 10, dmethod = "bray")
 
-set.seed(1)
+set.seed(2)
 nmds <- metaMDS(dist_matrix) # list
 
 nmds_df <- scores(nmds) %>%
