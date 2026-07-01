@@ -112,5 +112,5 @@ p <- ggplot(data = df_long, aes(x = sz_2, y = sz_1, fill = p_val)) +
   theme_classic(base_size = 12) +
   theme(legend.position = "none")
 
-fname <- "./figures/ADONIS_wunifrac_p.png"
+fname <- "./figures/ADONIS_wUniFrac_p.png"
 ggsave(fname, plot = p, width = 6.5, height = 3, dpi = 300)
