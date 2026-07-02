@@ -30,6 +30,8 @@ modulus_subset <- modulus %>%
   filter(freq_rad == 0.1) %>%
   select(-freq_rad) 
 
+# ------ Correlation ------
+
 mod_storage <- modulus_subset %>% filter(measure == "Storage Modulus")
 mod_loss <- modulus_subset %>% filter(measure == "Loss Modulus")
 
