@@ -46,6 +46,7 @@ p <- ggplot(nmds_df, aes(NMDS1, NMDS2, color = size.name, shape = size.name)) +
   scale_shape_manual(values = shapes) +
   scale_fill_manual(values = cols) +
   labs(
+    title = "NMDS",
     x = "Axis 1", 
     y = "Axis 2",
     shape = "Size", 
