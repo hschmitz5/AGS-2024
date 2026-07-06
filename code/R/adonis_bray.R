@@ -85,6 +85,13 @@ df_p <- df %>%
     values_from = p_value
   ) 
 
+df_R2 <- df %>%
+  dplyr::select(sz_1, sz_2, R2) %>%
+  pivot_wider(
+    names_from = sz_2,
+    values_from = R2
+  ) 
+
 df_bd <- df %>%
   dplyr::select(sz_1, sz_2, bd_pval) %>%
   pivot_wider(
@@ -92,12 +99,13 @@ df_bd <- df %>%
     values_from = bd_pval
   ) 
 
-df_R2 <- df %>%
-  dplyr::select(sz_1, sz_2, R2) %>%
-  pivot_wider(
-    names_from = sz_2,
-    values_from = R2
-  ) 
+saveRDS(df_bd, file = "./data/bray_betadisper_result.rds")
+
+bd_long <- df_bd |>
+  pivot_longer(!sz_1, names_to = "sz_2", values_to = "bd") 
+
+bd_long$sz_1 <- factor(bd_long$sz_1, levels = rev(sizes))
+bd_long$sz_2 <- factor(bd_long$sz_2, levels = sizes)
 
 # ------ Write to Excel ------
 
@@ -115,13 +123,7 @@ write_xlsx(
 
 # ------ Plot ------
 
-df_long <- df_bd |>
-  pivot_longer(!sz_1, names_to = "sz_2", values_to = "bd") 
-
-df_long$sz_1 <- factor(df_long$sz_1, levels = rev(sizes))
-df_long$sz_2 <- factor(df_long$sz_2, levels = sizes)
-
-p <- ggplot(data = df_long, aes(x = sz_2, y = sz_1, fill = bd)) +
+p <- ggplot(data = bd_long, aes(x = sz_2, y = sz_1, fill = bd)) +
   geom_tile() + 
   geom_text(aes(label = round(bd,2))) +
   scale_fill_gradient(
