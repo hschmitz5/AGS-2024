@@ -132,7 +132,7 @@ p <- ggplot(data = bd_long, aes(x = sz_2, y = sz_1, fill = bd)) +
     na.value = "white"
   ) +
   labs(
-    title = "Group Dispersion p-values",
+    title = "Dispersion Homogeneity p-values",
     x = NULL,
     y = NULL
   ) +
@@ -140,7 +140,7 @@ p <- ggplot(data = bd_long, aes(x = sz_2, y = sz_1, fill = bd)) +
   theme(legend.position = "none")
 
 fname <- "./figures/betadisper_Bray.png"
-ggsave(fname, plot = p, width = 6.5, height = 3, dpi = 300)
+ggsave(fname, plot = p, width = 5.38, height = 3, dpi = 300)
 
 # ------ Look at distance matrix ------
 
