@@ -94,7 +94,7 @@ ps_genus = tax_glom(ps_filt, "Genus")
 # ------ Save at genus level ------
 
 # remove floccular granules
-ps_sub <- subset_samples(ps_genus, size.name != "floccular")
+ps_sub <- subset_samples(ps_genus, size.name != "Floccular")
 
 saveRDS(ps_genus, file = "./data/phyloseq/ps_genus_full.rds")
 saveRDS(ps_sub,   file = "./data/phyloseq/ps_genus_subset.rds")
