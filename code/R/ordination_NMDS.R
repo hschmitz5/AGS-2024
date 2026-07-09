@@ -26,7 +26,8 @@ nmds_df <- scores(nmds) %>%
   as_tibble(rownames = "SampleID") %>%
   left_join(., metadata, by = "SampleID")
 
-stress_text <- paste0("2D stress: ",round(nmds$stress,2))
+stress_text <- paste0("2D stress: ",round(nmds$stress,3))
+print(stress_text)
 
 # ------ Plot ------
 
