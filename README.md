@@ -4,15 +4,17 @@ Raw paired-end reads are available through the NCBI SRA, accession PRJNA1367764.
 
 ### 1.) Generate phyloseq object
 
-Use define_ps.R 
+- define_ps.R -- generates ASV and genus level data
+- define_ps_metab -- generates functional level data
 
-### 2.) Determine significant taxa, using differential abundance analysis
+### 2.) Determine significant taxa, using differential abundance (DA) analysis
 
-Use run_ancombc2.R 
+- run_ancombc2_genus.R -- runs DA at the genus level
+- run_ancombc2_metab.R -- runs DA at the functional group level
 
 ### 3.) Core Functions
 
-- 01_load_ps.R: loads phyloseq object and defines necessary variables
-- 02_metab_and_DA.R: defines functions for loading metabolism and differential abundance
+- 01_load_ps.R -- loads phyloseq object and defines necessary variables
+- 02_sum_rel_ab_by_function.R -- agglomerates relative abundance by functional group
   
 ### 4.) Plotting and Statistics
