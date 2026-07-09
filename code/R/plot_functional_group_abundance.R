@@ -14,7 +14,7 @@ n_rows <- length(metab_order)
 DA_df <- readRDS("./data/DA/DA_metab_processed.rds") %>%
   mutate(metab = factor(metab, levels = metab_order))
     
-rel_ab_df <- join_rel_ab_and_function(ps) %>%
+rel_ab_df <- sum_rel_ab_by_function(ps) %>%
   filter(metab %in% metab_order) %>%
   mutate(
     metab = factor(metab, levels = metab_order)
