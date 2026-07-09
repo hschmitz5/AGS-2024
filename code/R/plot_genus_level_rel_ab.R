@@ -130,7 +130,7 @@ ht <- Heatmap(
     labels = breaks_rel_display,
     title = NULL, #"Log (%)",
     direction = "horizontal",
-    legend_width = unit(7.5, "cm")
+    legend_width = unit(7, "cm")
   ),
   # Annotations
   bottom_annotation = size_annot,

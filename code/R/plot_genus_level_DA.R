@@ -107,7 +107,7 @@ ht <- Heatmap(
     labels = breaks_display,
     title = NULL, #"log fold change", 
     direction = "horizontal",
-    legend_width = unit(4, "cm")
+    legend_width = unit(5.5, "cm")
   ),
   # # Annotations
   right_annotation = m_annot,
