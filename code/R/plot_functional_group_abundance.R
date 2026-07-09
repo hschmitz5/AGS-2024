@@ -8,7 +8,7 @@ source("./code/R/02_join_rel_ab_and_function.R")
 
 write2excel <- 0
 
-metab_order <- c("GAO", "PAO", "AOB", "NOB", "Filamentous")
+metab_order <- c("GAO", "PAO", "Filamentous")
 n_rows <- length(metab_order)
 
 DA_df <- readRDS("./data/DA/DA_metab_processed.rds") %>%
@@ -69,7 +69,7 @@ p <- p1 + p2 +
   
 # Save plot
 fname <- "./figures/functional_group_abundance.png"
-ggsave(fname, plot = p, width = 6.5, height = 7.5, dpi = 300)
+ggsave(fname, plot = p, width = 6.5, height = 6, dpi = 300)
 
 
 
