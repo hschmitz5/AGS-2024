@@ -41,13 +41,12 @@ cols <- c("gray", met.brewer(size_pal, n_sizes))
 p <- ggplot(nmds_df, aes(NMDS1, NMDS2, color = size.name, shape = size.name)) +
   geom_point() +
   geom_polygon(alpha = 0.5, aes(fill = size.name)) +
-  # annotate("text", x = Inf, y = -Inf, label = stress_text,
-  #          hjust = 1.1, vjust = -0.5) +
+  # annotate("text", x = Inf, y = Inf, label = stress_text,
+  #          hjust = 1.6, vjust = 1.1, size = 3) +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = shapes) +
   scale_fill_manual(values = cols) +
   labs(
-    title = "NMDS",
     x = "Axis 1", 
     y = "Axis 2",
     shape = "Size", 
