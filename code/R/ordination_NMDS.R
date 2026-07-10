@@ -26,7 +26,7 @@ nmds_df <- scores(nmds) %>%
   as_tibble(rownames = "SampleID") %>%
   left_join(., metadata, by = "SampleID")
 
-stress_text <- paste0("2D stress: ",round(nmds$stress,3))
+stress_text <- paste0("2D Stress = ",round(nmds$stress,3))
 print(stress_text)
 
 # ------ Plot ------
@@ -41,8 +41,6 @@ cols <- c("gray", met.brewer(size_pal, n_sizes))
 p <- ggplot(nmds_df, aes(NMDS1, NMDS2, color = size.name, shape = size.name)) +
   geom_point() +
   geom_polygon(alpha = 0.5, aes(fill = size.name)) +
-  # annotate("text", x = Inf, y = Inf, label = stress_text,
-  #          hjust = 1.6, vjust = 1.1, size = 3) +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = shapes) +
   scale_fill_manual(values = cols) +
