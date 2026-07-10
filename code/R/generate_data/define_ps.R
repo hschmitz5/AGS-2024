@@ -4,6 +4,7 @@ rm(list = ls())
 library(qiime2R)
 library(phyloseq)
 library(tidyverse)
+source("./code/R/generate_data/ps_agglom_function.R")
 
 # define sample names
 size <- data.frame(
@@ -55,41 +56,8 @@ saveRDS(ps_rare, file = "./data/phyloseq/ps_ASV_rarefied.rds")
 
 # ------ Agglomerate, keeping NA values  ------
 
-# If Genus is NA, then replace with higher order
-taxonomy <- data.frame(ps_filt@tax_table) %>%
-  rownames_to_column("OTU") %>%
-  mutate(
-    Genus = case_when(
-      !is.na(Genus)  ~ Genus,
-      !is.na(Family) ~ ifelse(startsWith(Family, "midas"), paste0("Unk_", Family), paste0("Unk_f_", Family)),
-      !is.na(Order)  ~ ifelse(startsWith(Order, "midas"), paste0("Unk_", Order), paste0("Unk_o_", Order)),
-      !is.na(Class)  ~ ifelse(startsWith(Class, "midas"), paste0("Unk_", Class), paste0("Unk_c_", Class)),
-      !is.na(Phylum) ~ ifelse(startsWith(Phylum, "midas"), paste0("Unk_", Phylum), paste0("Unk_p_", Phylum)),
-      is.na(Phylum)  ~ paste0("Unknown_Phylum"),
-      .default = Genus
-    )
-  ) %>%
-  # name ASVs
-  group_by(Genus) %>%
-  mutate(
-    new_OTU = if (n() == 1) {
-      Genus
-    } else {
-      paste0(Genus, "-", row_number())
-    }
-  ) %>%
-  ungroup() %>%
-  column_to_rownames("OTU") %>%
-  as.matrix()
-
-# Add new taxonomy to phyloseq object
-tax_table(ps_filt) <- tax_table(taxonomy)
-rm(taxonomy)
-
-
-# uses updated taxonomy to keep NA values
-ps_genus = tax_glom(ps_filt, "Genus")
-
+ps_genus   <- agglom_genus(ps_filt)
+ps_species <- agglom_species(ps_filt)
 
 # ------ Save at genus level ------
 
@@ -98,3 +66,7 @@ ps_sub <- subset_samples(ps_genus, size.name != "Floccular")
 
 saveRDS(ps_genus, file = "./data/phyloseq/ps_genus_full.rds")
 saveRDS(ps_sub,   file = "./data/phyloseq/ps_genus_subset.rds")
+
+# ------ Species level ------
+
+saveRDS(ps_species, file = "./data/phyloseq/ps_species_full.rds")
