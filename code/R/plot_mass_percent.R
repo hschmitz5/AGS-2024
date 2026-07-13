@@ -34,9 +34,9 @@ p <- ggplot(df) +
     labels = x_edges[-length(x_edges)]
   ) +
   labs(
-    x = "Biomass Diameter [mm]",
-    y = "Mass Percentage [%]",
-    fill = ""
+    x = "Biomass Size (mm)",
+    y = "Mass Fraction (%)",
+    fill = NULL
   ) +
   theme_classic(base_size = 14) +
   theme(
