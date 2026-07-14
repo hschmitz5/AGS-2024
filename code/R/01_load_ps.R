@@ -5,7 +5,6 @@ suppressPackageStartupMessages({
   # formatting figures
   library(patchwork)
   # colors
-  library(RColorBrewer)
   library(MetBrewer) 
 })
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, cache = TRUE)
