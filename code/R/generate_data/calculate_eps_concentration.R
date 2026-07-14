@@ -5,9 +5,9 @@
 # and check the R-squared in the model summary
 
 rm(list = ls())
+library(tidyverse)
 library(readxl)
 library(writexl)
-library(tidyverse)
 library(ggplot2)
 
 # change to process each sheet
