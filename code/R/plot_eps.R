@@ -15,6 +15,10 @@ group_data <- function(fname) {
       avg = mean(C_VSS),
       sd = sd(C_VSS),
       .groups = "drop"
+    ) %>%
+    mutate(
+      extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
+      extract = factor(extract, levels = c("Tightly Bound", "Loosely Bound"))
     )
   }
 # Apply function to each assay
@@ -41,18 +45,12 @@ df <- bind_rows(
   .id = "assay"
   ) %>%
   mutate(
-    assay = factor(assay, levels = c("Polysaccharide (PS)", "Protein (PN)", "Total EPS (PN + PS)")),
-    extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
-    extract = factor(extract, levels = c("Tightly Bound", "Loosely Bound"))
+    assay = factor(assay, levels = c("Polysaccharide (PS)", "Protein (PN)", "Total EPS (PN + PS)"))
     ) 
 
 # Calculate PN/PS
 PNPS <- df_wide %>% 
-  select(size, extract, avg = PNPS) %>%
-  mutate(
-    extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
-    extract = factor(extract, levels = c("Tightly Bound", "Loosely Bound"))
-    ) 
+  select(size, extract, avg = PNPS) 
 
 # ------ Correlation ------
 
@@ -63,7 +61,10 @@ sz <- data.frame(
 )
 
 df_wide <- df_wide %>%
-  left_join(., sz, by = "size")
+  left_join(., sz, by = "size") %>%
+  mutate(
+    extract = recode(extract,"Loosely Bound" = "LB","Tightly Bound" = "TB")
+  )
 
 vars <- c("PN_avg", "PS_avg", "PNPS", "total") # rows
 
