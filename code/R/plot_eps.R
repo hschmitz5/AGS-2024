@@ -41,16 +41,17 @@ df <- bind_rows(
   .id = "assay"
   ) %>%
   mutate(
+    assay = factor(assay, levels = c("Polysaccharide (PS)", "Protein (PN)", "Total EPS (PN + PS)")),
     extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
-    extract = factor(extract, levels = c("Tightly Bound", "Loosely Bound")),
-    assay = factor(assay, levels = c("Polysaccharide (PS)", "Protein (PN)", "Total EPS (PN + PS)"))
+    extract = factor(extract, levels = c("Tightly Bound", "Loosely Bound"))
     ) 
 
 # Calculate PN/PS
 PNPS <- df_wide %>% 
   select(size, extract, avg = PNPS) %>%
   mutate(
-    extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound")
+    extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
+    extract = factor(extract, levels = c("Tightly Bound", "Loosely Bound"))
     ) 
 
 # ------ Correlation ------
