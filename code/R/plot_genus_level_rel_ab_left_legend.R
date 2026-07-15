@@ -114,6 +114,7 @@ ht_colors <- met.brewer(taxa_pal, type = "continuous")
 # Display legend ticks
 break_values <- c(0, 0.1, 1, 10, 25) # %
 breaks_log_display <- log10(break_values + pseudo) # Log (%)
+# Add % symbol to top break
 breaks_rel_display <- replace(
   as.character(break_values),
   length(break_values),
@@ -156,7 +157,8 @@ png(fname_rel,
     height = 7, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht, heatmap_legend_side = "left") 
-draw(lgd, x = unit(0.03, "npc"), y = unit(0.2, "npc"), just = c("left", "top"))
+# metabolism legend
+draw(lgd, x = unit(0.03, "npc"), y = unit(0.2, "npc"), just = c("left", "top")) 
 dev.off()
 
 ## Check what percent of relative abundance is included in plot
