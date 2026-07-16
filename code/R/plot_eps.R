@@ -9,7 +9,7 @@ fname_polys <- paste0("./data/EPS/PS_conc.rds")
 # Calculate average and std of replicates
 group_data <- function(fname) {
   df <- readRDS(fname) %>%
-    filter(size != "XS") %>%
+    filter(size != "Floccular") %>%
     group_by(extract, size) %>%
     summarize(
       avg = mean(C_VSS),
