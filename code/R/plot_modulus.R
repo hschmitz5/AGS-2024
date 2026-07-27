@@ -27,7 +27,7 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
     # change display names and order
     size = factor(size, levels = sz$name),
     measure = factor(measure, levels = c("G", "G2")),
-    measure = recode(measure,"G"="Storage Modulus","G2"="Loss Modulus")
+    measure = recode(measure,"G"="Storage Modulus (G')","G2"='Loss Modulus (G")')
     )
 
 modulus_subset <- modulus %>%
@@ -36,8 +36,8 @@ modulus_subset <- modulus %>%
 
 # ------ Correlation ------
 
-mod_storage <- modulus_subset %>% filter(measure == "Storage Modulus")
-mod_loss <- modulus_subset %>% filter(measure == "Loss Modulus")
+mod_storage <- modulus_subset %>% filter(measure == "Storage Modulus (G')")
+mod_loss <- modulus_subset %>% filter(measure == 'Loss Modulus (G")')
 
 res_storage <- cor.test(mod_storage$avg, sz$midpoint, method = "spearman")
 res_loss <- cor.test(mod_storage$avg, sz$midpoint, method = "spearman")
@@ -96,9 +96,3 @@ p <- plot_grid(
 
 fname_out <- "./figures/moduli.png"
 ggsave(fname_out, plot = p, width = 6.5, height = 5, dpi = 300)
-
-# fname_out <- "./figures/moduli.png"
-# ggsave(fname_out, plot = p1, width = 6.5, height = 2.25, dpi = 300)
-
-# fname_out <- "./figures/moduli_subset.png"
-# ggsave(fname_out, plot = p2, width = 5, height = 2.25, dpi = 300)
