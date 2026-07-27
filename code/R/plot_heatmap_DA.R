@@ -99,7 +99,7 @@ heatmap_lgd <- Legend(
   col_fun = ht_colors,
   labels = breaks_display,
   at = breaks_display,
-  title = "Log Fold-Change\n(Relative to S)",
+  title = "Log Fold-Change (Relative to S)",
   direction = "horizontal",
   legend_width = unit(5.9, "cm")
 )
@@ -130,7 +130,7 @@ fname  <- "./figures/genus_level_DA.png"
 # Draw combined heatmap
 png(fname,
     width = 5.5,  # width in inches; can adjust
-    height = 8.5, # height in inches; can adjust
+    height = 8.3, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht) 
 draw(pd, x = unit(0.1, "npc"), y = unit(0.03, "npc"), just = c("left", "bottom"))
