@@ -63,6 +63,7 @@ DA_genera <- readRDS("./data/DA/DA_genus_processed.rds") %>%
   pull(Genus) %>%
   unique()
 
+
 #### ---- Plotting ------
 
 # size annotation
@@ -84,9 +85,10 @@ size_annot <- HeatmapAnnotation(
 m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F") 
 m_annot <- rowAnnotation(
   df = m_df,
+  gap = unit(2, "mm"),
   # column names
   annotation_name_side = "top",
-  annotation_name_rot = 90,
+  annotation_name_rot = 60,
   # color
   col = col_list <- setNames(
     rep(list(m_colors), ncol(m_df)),
@@ -97,13 +99,13 @@ m_annot <- rowAnnotation(
   show_legend = FALSE
 )
 # metabolism legend
-lgd <- Legend(
+metab_lgd <- Legend(
   title = "Functional Group",
-  # title_position = "leftcenter",
   labels = c("Positive", "Variable"),
   legend_gp = gpar(fill = m_colors),
-  nrow = 2,
-  row_gap = unit(3, "mm")
+  nrow = 1,
+  title_position = "leftcenter",
+  title_gap = unit(3, "mm")
 )
 
 ## Relative Abundance
@@ -126,42 +128,44 @@ row_fontface <- ifelse(
          ifelse(italic_rows, "italic", "plain"))
 )
 
-# Legend Colors
-ht_colors <- colorRamp2(
-  breaks <- seq(
-    -1.12, # min(log_mat)
-    max(log_mat),
-    length.out = 10
-  ), 
-  met.brewer(taxa_pal, 10)
-)
-# Display legend ticks
-break_values <- c(0, 0.1, 1, 10, 25) # %
+# Relative Abundance legend 
+break_values <- c(0, 0.1, 1, 5, round(ceiling(max(rel_df))))
 breaks_log_display <- log10(break_values + pseudo) # Log (%)
-# Add % symbol to top break
+# Add % symbol to largest break
 breaks_rel_display <- replace(
   as.character(break_values),
   length(break_values),
   paste0(tail(break_values, 1), "%")
 )
+# Legend Colors
+ht_colors <- colorRamp2(
+  breaks <- seq(
+    -1.12, #log10(break_values[1] + pseudo),
+    log10(tail(break_values, 1)),
+    length.out = 10
+  ), 
+  met.brewer(taxa_pal, 10)
+)
+
+heatmap_lgd <- Legend(
+  col_fun = ht_colors,
+  labels = breaks_rel_display,
+  at = breaks_log_display,
+  title = "Relative Abundance",
+  direction = "horizontal",
+  legend_width = unit(8.9, "cm")
+)
 
 ht <- Heatmap(
   log_mat,
   # columns
-  column_title = NULL, #"Relative Abundance",
   cluster_columns = FALSE, # changes sample order
   show_column_names = FALSE,
   column_split = split, # put a gap between sizes
+  column_title = NULL,  # sample names
   # heatmap legend
-  col = ht_colors, #ht_col_fun,
-  show_heatmap_legend = TRUE, 
-  heatmap_legend_param = list(
-    at = breaks_log_display,
-    labels = breaks_rel_display,
-    title = "Relative Abundance", 
-    title_position = "leftcenter-rot",
-    legend_height = unit(7.5, "cm")
-  ),
+  col = ht_colors, 
+  show_heatmap_legend = FALSE, 
   # Annotations
   top_annotation = size_annot,
   right_annotation = m_annot, 
@@ -172,17 +176,19 @@ ht <- Heatmap(
   column_names_gp = gpar(fontsize = col_fontsize)
 )
 
+pd = packLegend(heatmap_lgd, metab_lgd, direction = "horizontal", 
+                max_width = unit(10, "cm"), row_gap = unit(5, "mm"))
+
 # Figure output location
-fname_rel <- "./figures/genus_level_rel_ab_FULL.png"
+fname_rel <- "./figures/genus_level_rel_ab_bottom.png"
 
 # Draw combined heatmap
 png(fname_rel,
-    width = 7.5,  # width in inches; can adjust
-    height = 5.25, # height in inches; can adjust
+    width = 7,  # width in inches; can adjust
+    height = 7.5, # height in inches; can adjust
     units = "in", res = 300)
-draw(ht, heatmap_legend_side = "left") 
-# metabolism legend
-draw(lgd, x = unit(0.93, "npc"), y = unit(0.95, "npc"), just = c("right", "top"))
+draw(ht)
+draw(pd, x = unit(0.1, "npc"), y = unit(0.03, "npc"), just = c("left", "bottom"))
 dev.off()
 
 ## Check what percent of relative abundance is included in plot
