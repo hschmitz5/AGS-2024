@@ -120,7 +120,7 @@ ht <- Heatmap(
   width  = unit(n_cols * cell_w, "inches"),
   height = unit(n_rows * cell_h, "inches"),
   row_names_gp = gpar(fontsize = row_fontsize, fontface = row_fontface),
-  column_names_gp = gpar(fontsize = col_fontsize)
+  column_names_gp = gpar(fontsize = col_fontsize, fontface = "bold")
 )
 
 pd = packLegend(heatmap_lgd, metab_lgd, direction = "horizontal", 
