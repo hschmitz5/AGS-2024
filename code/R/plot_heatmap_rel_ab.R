@@ -19,10 +19,6 @@ cell_w <- 0.2
 row_fontsize <- 10
 col_fontsize <- 11
 
-# Pseudo count to add when converting to log
-# enables log(0)
-pseudo <- 1e-6  
-
 # ------ Define Data ------
 
 # Relative Abundance
@@ -39,7 +35,7 @@ rel_sum <- colSums(rel_df)
 
 # Convert to log
 log_mat <- as.matrix(rel_df) %>%
-  { log10(. + pseudo) }
+  { log10(.) }
 
 # Metabolism
 m_df <- rel_df %>%
