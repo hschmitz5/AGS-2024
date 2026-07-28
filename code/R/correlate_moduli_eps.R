@@ -36,8 +36,8 @@ modulus_subset <- modulus %>%
 # ------ EPS data ------
 
 # File names for concentration data
-fname_pn    <- paste0("./data/EPS/PN_conc.rds")
-fname_polys <- paste0("./data/EPS/PS_conc.rds")
+fname_pn    <- paste0("./data/EPS/PN_conc_ags.rds")
+fname_polys <- paste0("./data/EPS/PS_conc_ags.rds")
 
 # Calculate average and std of replicates
 group_data <- function(fname) {
