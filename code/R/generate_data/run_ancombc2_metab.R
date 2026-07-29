@@ -50,6 +50,20 @@ process_DA <- function(output, value_col) {
     tidyr::pivot_longer(!metab, names_to = "size", values_to = "lfc") %>%
     dplyr::arrange(metab)
   
+  df_se <- res_prim %>%
+    # set non-DA values to zero
+    dplyr::mutate(M = ifelse(diff_size.nameM == 1, 
+                             round(se_size.nameM, 2), 0),
+                  L = ifelse(diff_size.nameL == 1, 
+                             round(se_size.nameL, 2), 0),
+                  XL = ifelse(diff_size.nameXL == 1, 
+                              round(se_size.nameXL, 2), 0),
+                  XXL = ifelse(diff_size.nameXXL == 1, 
+                               round(se_size.nameXXL, 2), 0)) %>%
+    dplyr::select(metab, M, L, XL, XXL) %>%
+    tidyr::pivot_longer(!metab, names_to = "size", values_to = "se") %>%
+    dplyr::arrange(metab)
+  
   df_robust <- res_prim %>%
     # true if robust (is differentially abundant and passed sensitivity analysis)
     dplyr::mutate(M = ifelse(diff_robust_size.nameM == 1, 
@@ -65,6 +79,7 @@ process_DA <- function(output, value_col) {
     dplyr::arrange(metab)
   
   df = df_lfc %>%
+    dplyr::full_join(df_se, by = c("metab", "size")) %>%
     dplyr::full_join(df_robust, by = c("metab", "size")) %>%
     mutate(size = factor(size, levels = c("M", "L", "XL", "XXL"))) %>%
     mutate(metab_val = value_col)
