@@ -9,20 +9,18 @@ source("./code/R/02_sum_rel_ab_by_function.R")
 write2excel <- 0
 
 metab_order <- c("GAO", "PAO", "Filamentous")
-
-DA_df <- readRDS("./data/DA/DA_metab_processed.rds") %>%
-  mutate(metab = factor(metab, levels = metab_order))
     
 rel_ab_df <- sum_rel_ab_by_function(ps) %>%
   mutate(
     metab = factor(metab, levels = metab_order)
     )
 
+DA_df <- readRDS("./data/DA/DA_metab_processed.rds") %>%
+  mutate(metab = factor(metab, levels = metab_order))
+
 # ------------ Plot ------------------
 
-min_y = floor(min(DA_df$lfc))
-max_y = ceiling(max(DA_df$lfc))
-
+# Relative Abundance
 p1 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
   geom_col(position = "dodge", width = 0.6) +
   geom_errorbar(
@@ -37,11 +35,16 @@ p1 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
     x = "Size"
   ) 
 
+# Differential Abundance
 p2 <- ggplot(DA_df, aes(x = size, y = lfc, fill = metab_val)) +
   geom_col(position = "dodge", width = 0.6) +
+  geom_errorbar(
+    aes(ymin = lfc - se, ymax = lfc + se),
+    width = 0.2,
+    position = position_dodge(width = 0.6)
+  ) +
   geom_hline(yintercept = 0, linewidth = 0.5, color = "darkgray") +  # bold y = 0
   facet_wrap(~metab, scales = "fixed", ncol = 1) +
-  ylim(min_y, max_y) +
   labs(
     title = "Differential Abundance",
     y = "Log Fold-Change (Relative to S Size)",
