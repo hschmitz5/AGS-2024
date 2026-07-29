@@ -47,7 +47,7 @@ saveRDS(ps_filt, file = "./data/phyloseq/ps_ASV.rds")
 # ------ Agglomerate, keeping NA values  ------
 
 ps_genus   <- agglom_genus(ps_filt)
-ps_species <- agglom_species(ps_filt)
+# ps_species <- agglom_species(ps_filt)
 
 # ------ Save at genus level ------
 
@@ -59,4 +59,4 @@ saveRDS(ps_sub,   file = "./data/phyloseq/ps_genus_subset.rds")
 
 # ------ Species level ------
 
-saveRDS(ps_species, file = "./data/phyloseq/ps_species_full.rds")
+# saveRDS(ps_species, file = "./data/phyloseq/ps_species_full.rds")
