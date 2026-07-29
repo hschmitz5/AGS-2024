@@ -76,7 +76,7 @@ df_wide <- df_wide %>%
     extract = recode(extract,"Loosely Bound" = "LB","Tightly Bound" = "TB")
   )
 
-vars <- c("PN_avg", "PS_avg", "PNPS", "total") # rows
+vars <- c("PN_avg", "PS_avg", "total", "PNPS") # rows
 
 correlate_EPS <- function(df_wide, extract_type) {
   df_extract <- df_wide %>% filter(extract == extract_type)
@@ -93,12 +93,13 @@ correlate_EPS <- function(df_wide, extract_type) {
       extract = extract_type,
       p.adj = p.adjust(p.value, method = "BH")
     ) |>
-    select(extract, var, estimate, p.value, p.adj)
+    select(extract, var, p.value, p.adj, estimate)
 }
 
 res_LB <- correlate_EPS(df_wide, "LB")
 res_TB <- correlate_EPS(df_wide, "TB")
 
+res <- rbind(res_TB, res_LB)
 
 # ------ Plot ------
 
