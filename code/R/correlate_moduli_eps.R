@@ -61,13 +61,13 @@ df_wide <- left_join(
   by = c("size", "extract")
   ) %>%
   mutate(
-    PNPS = PN_avg/PS_avg,
-    total = PN_avg + PS_avg
+    total = PN_avg + PS_avg,
+    PNPS = PN_avg/PS_avg
   )
 
 # ------ Correlation ------
 
-vars <- c("PN_avg", "PS_avg", "PNPS", "total") # rows
+vars <- c("PN_avg", "PS_avg", "total", "PNPS") # rows
 
 correlate_EPS <- function(df_wide, extract_type) {
   df_extract <- df_wide %>% filter(extract == extract_type)
@@ -87,7 +87,7 @@ correlate_EPS <- function(df_wide, extract_type) {
     select(extract, var, estimate, p.value, p.adj)
 }
 
-res_LB <- correlate_EPS(df_wide, "LB")
 res_TB <- correlate_EPS(df_wide, "TB")
+res_LB <- correlate_EPS(df_wide, "LB")
 
-res <- rbind(res_LB, res_TB)
+res <- rbind(res_TB, res_LB)
