@@ -49,6 +49,23 @@ df_lfc <- res_prim %>%
   dplyr::select(Genus, M, L, XL, XXL) %>%
   tidyr::pivot_longer(!Genus, names_to = "size", values_to = "lfc") %>%
   dplyr::arrange(Genus)
+
+df_se <- res_prim %>%
+  # filter for values that are differentially abundant (TRUE)
+  dplyr::filter(diff_size.nameM == 1 | diff_size.nameL == 1 |
+                  diff_size.nameXL == 1 | diff_size.nameXXL == 1) %>%
+  # set non-DA values to zero
+  dplyr::mutate(M = ifelse(diff_size.nameM == 1, 
+                           round(se_size.nameM, 2), 0),
+                L = ifelse(diff_size.nameL == 1, 
+                           round(se_size.nameL, 2), 0),
+                XL = ifelse(diff_size.nameXL == 1, 
+                            round(se_size.nameXL, 2), 0),
+                XXL = ifelse(diff_size.nameXXL == 1, 
+                             round(se_size.nameXXL, 2), 0)) %>%
+  dplyr::select(metab, M, L, XL, XXL) %>%
+  tidyr::pivot_longer(!metab, names_to = "size", values_to = "se") %>%
+  dplyr::arrange(metab)
   
 df_robust <- res_prim %>%
   # filter for values that are differentially abundant (TRUE)
@@ -68,6 +85,7 @@ df_robust <- res_prim %>%
   dplyr::arrange(Genus)
   
 df = df_lfc %>%
+  dplyr::full_join(df_se, by = c("Genus", "size")) %>%
   dplyr::full_join(df_robust, by = c("Genus", "size")) %>%
   mutate(size = factor(size, levels = c("M", "L", "XL", "XXL"))) 
 
