@@ -28,7 +28,7 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
 
 modulus_subset <- modulus %>%
   filter(
-    measure == "G2",
+    measure == "G", # G2
     freq_rad == 0.1
     ) %>%
   select(size, avg) 
