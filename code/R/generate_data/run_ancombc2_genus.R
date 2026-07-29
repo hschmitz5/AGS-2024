@@ -63,9 +63,9 @@ df_se <- res_prim %>%
                             round(se_size.nameXL, 2), 0),
                 XXL = ifelse(diff_size.nameXXL == 1, 
                              round(se_size.nameXXL, 2), 0)) %>%
-  dplyr::select(metab, M, L, XL, XXL) %>%
-  tidyr::pivot_longer(!metab, names_to = "size", values_to = "se") %>%
-  dplyr::arrange(metab)
+  dplyr::select(Genus, M, L, XL, XXL) %>%
+  tidyr::pivot_longer(!Genus, names_to = "size", values_to = "se") %>%
+  dplyr::arrange(Genus)
   
 df_robust <- res_prim %>%
   # filter for values that are differentially abundant (TRUE)
