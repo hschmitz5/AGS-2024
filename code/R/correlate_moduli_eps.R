@@ -28,7 +28,7 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
 
 modulus_subset <- modulus %>%
   filter(
-    measure == "G",
+    measure == "G2",
     freq_rad == 0.1
     ) %>%
   select(size, avg) 
@@ -84,7 +84,7 @@ correlate_EPS <- function(df_wide, extract_type) {
       extract = extract_type,
       p.adj = p.adjust(p.value, method = "BH")
     ) |>
-    select(extract, var, estimate, p.value, p.adj)
+    select(extract, var, p.value, p.adj, estimate)
 }
 
 res_TB <- correlate_EPS(df_wide, "TB")
