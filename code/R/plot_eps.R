@@ -101,6 +101,25 @@ res_TB <- correlate_EPS(df_wide, "TB")
 
 res <- rbind(res_TB, res_LB)
 
+# Community Correlation
+
+source("./code/R/01_load_ps.R")
+
+# Relative Abundance
+rel <- get_rel(ps) %>%
+  filter(Genus == "Ca_Contendobacter") %>% 
+  group_by(size.name) %>%
+  summarize(
+    mean_ab = mean(Abundance),
+    .groups = "drop"
+  ) %>%
+  column_to_rownames(var = "size.name")
+
+df_extract <- df_wide %>%
+  filter(extract == "LB") 
+
+test <- cor.test(rel$mean_ab, df_extract$PN_avg, method = "spearman")
+
 # ------ Plot ------
 
 p <- ggplot(df_all, aes(x = size, y = avg, fill = assay)) +
