@@ -3,9 +3,6 @@ library(ComplexHeatmap)
 library(circlize) # for colorRamp2
 source("./code/R/01_load_ps.R")
 
-# load phyloseq object (absolute counts)
-ps <- readRDS("./data/phyloseq/ps_genus_full.rds")
-
 # number of rows to show
 n_show <- 30 
 
