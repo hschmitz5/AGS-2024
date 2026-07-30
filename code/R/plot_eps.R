@@ -101,24 +101,36 @@ res_TB <- correlate_EPS(df_wide, "TB")
 
 res <- rbind(res_TB, res_LB)
 
-# Community Correlation
-
-source("./code/R/01_load_ps.R")
-
-# Relative Abundance
-rel <- get_rel(ps) %>%
-  filter(Genus == "Ca_Contendobacter") %>% 
-  group_by(size.name) %>%
-  summarize(
-    mean_ab = mean(Abundance),
-    .groups = "drop"
+# Differential Abundance comparison
+# Convert EPS concentrations to differential abundance (relative to S)
+DA_eps <- df_wide %>%
+  filter(extract == "LB") %>%
+  mutate(
+    PN_diff = PN_avg - PN_avg[size == "S"][1],
+    PS_diff = PS_avg - PS_avg[size == "S"][1],
+    total_diff = total - total[size == "S"][1],
+    PNPS_diff = PNPS - PNPS[size == "S"][1]
   ) %>%
-  column_to_rownames(var = "size.name")
+  filter(size != "S") %>%
+  select(extract, size, PN_diff, PS_diff, total_diff, PNPS_diff)
 
-df_extract <- df_wide %>%
-  filter(extract == "LB") 
+# Community Correlation
+DA_comm <- readRDS("./data/DA/DA_genus_processed.rds") %>%
+  filter(Genus == "Ca_Contendobacter")
 
-test <- cor.test(rel$mean_ab, df_extract$PN_avg, method = "spearman")
+vars <- c("PN_diff", "PS_diff", "total_diff", "PNPS_diff")
+DA_test <- vars |>
+  set_names() |>
+  map_dfr(
+    \(x) broom::tidy(
+      cor.test(DA_comm$lfc, DA_eps[[x]], method = "spearman")
+    ),
+    .id = "var"
+  ) |>
+  mutate(
+    p.adj = p.adjust(p.value, method = "BH")
+  ) |>
+  select(var, p.value, p.adj, estimate)
 
 # ------ Plot ------
 
