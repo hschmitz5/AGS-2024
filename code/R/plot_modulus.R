@@ -96,3 +96,6 @@ p <- plot_grid(
 
 fname_out <- "./figures/moduli.png"
 ggsave(fname_out, plot = p, width = 6.5, height = 5, dpi = 300)
+
+fname_out <- "./figures/moduli_single.png"
+ggsave(fname_out, plot = p1, width = 6.5, height = 2.5, dpi = 300)
