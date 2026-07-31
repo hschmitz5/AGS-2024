@@ -39,7 +39,7 @@ rel_names <- get_rel_wide(ps) %>%
 
 data_mat <- data_df %>%
   filter(Genus %in% rel_names) %>%
-  dplyr::select(-robust) %>%
+  dplyr::select(-se, -robust) %>%
   pivot_wider(names_from = size, values_from = lfc) %>%
   column_to_rownames(var = "Genus") %>%
   as.matrix()
@@ -126,7 +126,7 @@ ht <- Heatmap(
 pd = packLegend(heatmap_lgd, metab_lgd, direction = "horizontal", 
                 max_width = unit(10, "cm"), row_gap = unit(5, "mm"))
 
-fname  <- "./figures/genus_level_DA.png"
+fname  <- "./figures/heatmap_DA.tif"
 # Draw combined heatmap
 png(fname,
     width = 5.5,  # width in inches; can adjust

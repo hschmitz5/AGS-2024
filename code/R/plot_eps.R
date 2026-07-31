@@ -194,5 +194,5 @@ p <- ggplot(df_all, aes(x = size, y = avg, fill = assay)) +
   )
 
 
-fname_out <- "./figures/EPS.png"
+fname_out <- "./figures/Figure_2.tif"
 ggsave(fname_out, plot = p, width = 6.5, height = 3, dpi = 300)

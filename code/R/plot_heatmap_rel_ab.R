@@ -160,7 +160,7 @@ pd = packLegend(heatmap_lgd, metab_lgd, direction = "horizontal",
                 max_width = unit(10, "cm"), row_gap = unit(5, "mm"))
 
 # Figure output location
-fname_rel <- "./figures/genus_level_rel_ab_bottom.png"
+fname_rel <- "./figures/heatmap_rel_ab.tif"
 
 # Draw combined heatmap
 png(fname_rel,

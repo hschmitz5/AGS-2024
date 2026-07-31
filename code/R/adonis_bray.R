@@ -139,7 +139,7 @@ p <- ggplot(data = bd_long, aes(x = sz_2, y = sz_1, fill = bd)) +
   theme_classic(base_size = 12) +
   theme(legend.position = "none")
 
-fname <- "./figures/betadisper_Bray.png"
+fname <- "./figures/Figure_S.2.tif"
 ggsave(fname, plot = p, width = 5.38, height = 3, dpi = 300)
 
 # ------ Look at distance matrix ------

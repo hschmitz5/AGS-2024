@@ -53,5 +53,5 @@ p <- ggplot(nmds_df, aes(NMDS1, NMDS2, color = size.name, shape = size.name)) +
   theme_classic(base_size = 12) +
   theme(legend.position = "none")
 
-fname <- "./figures/ordination_NMDS_small.png"
+fname <- "./figures/ordination_NMDS_small.tif"
 ggsave(fname, plot = p, width = 3.75, height = 2, dpi = 300)

@@ -69,7 +69,7 @@ p <- p1 + p2 +
     ) 
   
 # Save plot
-fname <- "./figures/functional_group_abundance.png"
+fname <- "./figures/Figure_4.tif"
 ggsave(fname, plot = p, width = 6.5, height = 6, dpi = 300)
 
 

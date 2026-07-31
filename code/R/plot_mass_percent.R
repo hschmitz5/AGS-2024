@@ -43,7 +43,7 @@ p <- ggplot(df) +
 
 # Save figure -------------------------------------------------------
 
-fname <- "./figures/mass-percent.png"
+fname <- "./figures/Figure_S.1.tif"
 ggsave(fname, p, width = 6.5, height = 4, dpi = 300)
 
 # Display

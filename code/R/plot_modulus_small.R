@@ -67,5 +67,5 @@ p1 <- ggplot(modulus, aes(x = freq_rad, y = avg, color = size)) +
     ),
     legend.position = "none")
 
-fname_out <- "./figures/moduli_small.png"
+fname_out <- "./figures/moduli_small.tif"
 ggsave(fname_out, plot = p1, width = 4, height = 2, dpi = 300)
