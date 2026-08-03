@@ -22,9 +22,9 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
     sd = sd/1000,
     # change display names and order
     measure = factor(measure, levels = c("G", "G2")),
-    measure = recode(measure,"G"="Storage Modulus (G')","G2"='Loss Modulus (G")')
+    measure = recode(measure,"G"="Storage Modulus (G')","G2"='Loss Modulus (G")'),
+    size = factor(size, levels = size_meta$name)
     )
-modulus$size <- factor(modulus$size, levels = size$name)
 
 modulus_subset <- modulus %>%
   filter(freq_rad == 0.1) %>%
@@ -35,8 +35,8 @@ modulus_subset <- modulus %>%
 mod_storage <- modulus_subset %>% filter(measure == "Storage Modulus (G')")
 mod_loss <- modulus_subset %>% filter(measure == 'Loss Modulus (G")')
 
-res_storage <- cor.test(mod_storage$avg, as.numeric(size$midpoint), method = "spearman")
-res_loss <- cor.test(mod_loss$avg, as.numeric(size$midpoint), method = "spearman")
+res_storage <- cor.test(mod_storage$avg, as.numeric(size_meta$midpoint), method = "spearman")
+res_loss <- cor.test(mod_loss$avg, as.numeric(size_meta$midpoint), method = "spearman")
 
 #### Plot
 
