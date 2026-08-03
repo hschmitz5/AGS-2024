@@ -28,7 +28,8 @@ n_sizes      <- length(levels(ps@sam_data$size.mm))
 # define sample names
 size <- data.frame(
   ranges = levels(ps@sam_data$size.mm),
-  name = levels(ps@sam_data$size.name)
+  name = levels(ps@sam_data$size.name),
+  midpoint = levels(ps@sam_data$size.midpoint)
 )
 
 # For ordering
