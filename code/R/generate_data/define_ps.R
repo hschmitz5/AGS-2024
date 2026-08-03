@@ -8,9 +8,9 @@ source("./code/R/generate_data/ps_agglom_function.R")
 
 # define sample names
 size_meta <- data.frame(
-  ranges = c("0-0.85","0.85-1.4", "1.4-2", "2-2.8", "2.8-4", ">4"),
   name = c("Floccular", "S", "M", "L", "XL", "XXL"),
-  midpoint = c(0.425, 1.125, 1.7, 2.4, 3.4, 4.5)
+  midpoint = c(0.425, 1.125, 1.7, 2.4, 3.4, 4.5),
+  ranges = c("0-0.85","0.85-1.4", "1.4-2", "2-2.8", "2.8-4", ">4")
 )
 
 # Import QIIME2 data as phyloseq object
