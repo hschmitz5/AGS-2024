@@ -21,9 +21,9 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
     avg = avg/1000, 
     sd = sd/1000,
     # change display names and order
+    size = factor(size, levels = size_meta$name),
     measure = factor(measure, levels = c("G", "G2")),
-    measure = recode(measure,"G"="Storage Modulus (G')","G2"='Loss Modulus (G")'),
-    size = factor(size, levels = size_meta$name)
+    measure = recode(measure,"G"="Storage Modulus (G')","G2"='Loss Modulus (G")')
     )
 
 modulus_subset <- modulus %>%
