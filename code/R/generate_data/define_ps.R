@@ -23,7 +23,7 @@ ps <- qiime2R::qza_to_phyloseq(
 
 ps@sam_data$size.mm       <- factor(ps@sam_data$size.mm, levels = size$ranges)
 ps@sam_data$size.name     <- factor(size$name[as.numeric(ps@sam_data$size.mm)], levels = size$name)
-ps@sam_data$size.midpoint <- size$midpoint[as.numeric(ps@sam_data$size.mm)]
+ps@sam_data$size.midpoint <- factor(size$midpoint[as.numeric(ps@sam_data$size.mm)], levels = size$midpoint)
   
 # ------ Filter ------
 
@@ -47,7 +47,6 @@ saveRDS(ps_filt, file = "./data/phyloseq/ps_ASV.rds")
 # ------ Agglomerate, keeping NA values  ------
 
 ps_genus   <- agglom_genus(ps_filt)
-# ps_species <- agglom_species(ps_filt)
 
 # ------ Save at genus level ------
 
@@ -56,7 +55,3 @@ ps_sub <- subset_samples(ps_genus, size.name != "Floccular")
 
 saveRDS(ps_genus, file = "./data/phyloseq/ps_genus_full.rds")
 saveRDS(ps_sub,   file = "./data/phyloseq/ps_genus_subset.rds")
-
-# ------ Species level ------
-
-# saveRDS(ps_species, file = "./data/phyloseq/ps_species_full.rds")
