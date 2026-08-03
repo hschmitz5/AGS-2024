@@ -73,7 +73,7 @@ size_annot <- HeatmapAnnotation(
       fill = c(rep("lightgray", n_sizes)), # all the same color
       col = NA # removes border
     ),
-    labels = size$name,
+    labels = size_meta$name,
     labels_gp = gpar(
       col = c(rep("black", n_sizes)), 
       fontsize = col_fontsize
