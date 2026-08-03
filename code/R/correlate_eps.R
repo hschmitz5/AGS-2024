@@ -7,12 +7,8 @@ rm(ps) # do not confuse ps with PS
 
 # ------ Rheometry data ------
 
-# define sample names
-sz <- data.frame(
-  name = c("S", "M", "L", "XL", "XXL")
-)
-
 fname_in <- "./data/Rheometry_Nov_2024.xlsx"
+
 modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
   filter(size != "Floccular") %>%
   select(size, freq_rad, G_avg, G_sd, G2_avg, G2_sd) %>%
@@ -22,7 +18,7 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
     names_pattern = "(G2?|G2?)_(avg|sd)"
   ) %>%
   mutate(
-    size = factor(size, levels = sz$name),
+    size = factor(size, levels = size_meta$name),
     measure = factor(measure, levels = c("G", "G2"))
   )
 
@@ -54,6 +50,11 @@ group_data <- function(fname) {
 PN <- group_data(fname_pn) 
 PS <- group_data(fname_polys)
 
+# Change name for join
+size_meta <- size_meta %>%
+  rename(size = name) %>%
+  select(-ranges)
+
 # Calculate PN/PS
 df_wide <- left_join(
   PN %>% select(size, extract, PN_avg = avg), 
@@ -63,21 +64,43 @@ df_wide <- left_join(
   mutate(
     total = PN_avg + PS_avg,
     PNPS = PN_avg/PS_avg
-  )
+  ) %>%
+  left_join(., size_meta, by = "size") %>%       # join midpoint
+  left_join(., modulus_subset, by = "size") %>%  # join modulus
+  rename(modulus = avg) 
 
-# ------ Correlation ------
+# ------ Differential Abundance data ------
 
-vars <- c("PN_avg", "PS_avg", "total", "PNPS") # rows
+# Community Correlation
+DA_comm <- readRDS("./data/DA/DA_genus_processed.rds") %>%
+  filter(Genus == "Ca_Contendobacter")
 
-correlate_EPS <- function(df_wide, extract_type) {
+# Convert EPS concentrations to differential abundance (relative to S)
+DA_eps <- df_wide %>%
+  filter(extract == "LB") %>%
+  mutate(
+    PN_diff = PN_avg - PN_avg[size == "S"][1],
+    PS_diff = PS_avg - PS_avg[size == "S"][1],
+    total_diff = total - total[size == "S"][1],
+    PNPS_diff = PNPS - PNPS[size == "S"][1]
+  ) %>%
+  filter(size != "S") %>%
+  select(extract, size, PN_diff, PS_diff, total_diff, PNPS_diff)
+
+# ------ Correlate Size ------
+
+var2 <- c("PN_avg", "PS_avg", "total", "PNPS") # rows
+
+correlate_eps <- function(df_wide, var1, extract_type) {
+
   df_extract <- df_wide %>% filter(extract == extract_type)
-  
-  res_extract <- vars |>
+
+  res_extract <- var2 |>
     set_names() |>
     map_dfr(
       \(x) broom::tidy(
-        cor.test(modulus_subset$avg, df_extract[[x]], method = "spearman")
-        ),
+        cor.test(df_extract[[var1]], df_extract[[x]], method = "spearman")
+      ),
       .id = "var"
     ) |>
     mutate(
@@ -85,9 +108,30 @@ correlate_EPS <- function(df_wide, extract_type) {
       p.adj = p.adjust(p.value, method = "BH")
     ) |>
     select(extract, var, p.value, p.adj, estimate)
+
 }
 
-res_TB <- correlate_EPS(df_wide, "TB")
-res_LB <- correlate_EPS(df_wide, "LB")
+res_midpoint <- c("TB", "LB") |>
+  map_dfr(~ correlate_eps(df_wide, "midpoint", .x))
 
-res <- rbind(res_TB, res_LB)
+res_modulus <- c("TB", "LB") |>
+  map_dfr(~ correlate_eps(df_wide, "modulus", .x))
+
+
+
+### Differential Abundance
+
+vars <- c("PN_diff", "PS_diff", "total_diff", "PNPS_diff")
+
+res_DA <- vars |>
+  set_names() |>
+  map_dfr(
+    \(x) broom::tidy(
+      cor.test(DA_comm$lfc, DA_eps[[x]], method = "spearman")
+    ),
+    .id = "var"
+  ) |>
+  mutate(
+    p.adj = p.adjust(p.value, method = "BH")
+  ) |>
+  select(var, p.value, p.adj, estimate)
