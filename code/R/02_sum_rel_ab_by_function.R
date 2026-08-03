@@ -59,7 +59,7 @@ sum_rel_ab_by_function <- function(ps) {
   full_summary <- bind_rows(P_summary, PV_summary) %>%
     # define panel grouping
     mutate(
-      size.name = factor(size.name, levels = size$name)
+      size.name = factor(size.name, levels = size_meta$name)
     ) 
 
 }
