@@ -4,14 +4,10 @@ library(readxl)
 library(cowplot)
 library(MetBrewer)
 source("./code/R/01_load_ps.R")
-
-# define sample names
-sz <- data.frame(
-  name = c("S", "M", "L", "XL", "XXL"),
-  midpoint = c(1.125, 1.7, 2.4, 3.4, 4.5)
-)
+rm(ps)
 
 fname_in <- "./data/Rheometry_Nov_2024.xlsx"
+
 modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
   filter(size != "Floccular") %>%
   select(size, freq_rad, G_avg, G_sd, G2_avg, G2_sd) %>%
@@ -25,10 +21,10 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
     avg = avg/1000, 
     sd = sd/1000,
     # change display names and order
-    size = factor(size, levels = sz$name),
     measure = factor(measure, levels = c("G", "G2")),
     measure = recode(measure,"G"="Storage Modulus (G')","G2"='Loss Modulus (G")')
     )
+modulus$size <- factor(modulus$size, levels = size$name)
 
 modulus_subset <- modulus %>%
   filter(freq_rad == 0.1) %>%
@@ -39,8 +35,8 @@ modulus_subset <- modulus %>%
 mod_storage <- modulus_subset %>% filter(measure == "Storage Modulus (G')")
 mod_loss <- modulus_subset %>% filter(measure == 'Loss Modulus (G")')
 
-res_storage <- cor.test(mod_storage$avg, sz$midpoint, method = "spearman")
-res_loss <- cor.test(mod_storage$avg, sz$midpoint, method = "spearman")
+res_storage <- cor.test(mod_storage$avg, as.numeric(size$midpoint), method = "spearman")
+res_loss <- cor.test(mod_loss$avg, as.numeric(size$midpoint), method = "spearman")
 
 #### Plot
 
