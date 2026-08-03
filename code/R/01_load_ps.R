@@ -26,7 +26,7 @@ n_replicates <- 3
 n_sizes      <- length(levels(ps@sam_data$size.mm))
 
 # define sample names
-size <- data.frame(
+size_meta <- data.frame(
   ranges = levels(ps@sam_data$size.mm),
   name = levels(ps@sam_data$size.name),
   midpoint = levels(ps@sam_data$size.midpoint)
