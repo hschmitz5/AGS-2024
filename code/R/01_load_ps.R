@@ -29,7 +29,7 @@ n_sizes      <- length(levels(ps@sam_data$size.mm))
 size_meta <- data.frame(
   ranges = levels(ps@sam_data$size.mm),
   name = levels(ps@sam_data$size.name),
-  midpoint = levels(ps@sam_data$size.midpoint)
+  midpoint = as.numeric(levels(ps@sam_data$size.midpoint)) # correlation will not accept factors
 )
 
 # For ordering
