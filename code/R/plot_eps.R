@@ -2,79 +2,67 @@ rm(list = ls())
 library(tidyverse)
 library(ggh4x)
 
-# File names for concentration data
-fname_pn    <- paste0("./data/EPS/PN_conc_ags.rds")
-fname_polys <- paste0("./data/EPS/PS_conc_ags.rds")
+PN <- readRDS("./data/EPS/PN_conc_ags.rds") %>%
+  select(extract, size, replicate, PN = C_VSS) %>%
+  filter()
 
-# Calculate average and std of replicates
-group_data <- function(fname) {
-  df <- readRDS(fname) %>%
-    filter(size != "Floccular") %>%
-    group_by(extract, size) %>%
-    summarize(
-      avg = mean(C_VSS),
-      sd = sd(C_VSS),
-      .groups = "drop"
-    ) %>%
-    mutate(
-      extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
-      extract = factor(extract, levels = c("Tightly Bound", "Loosely Bound"))
-    )
-  }
-# Apply function to each assay
-PN <- group_data(fname_pn) 
-PS <- group_data(fname_polys)
+PS <- readRDS("./data/EPS/PS_conc_ags.rds") %>%
+  select(extract, size, replicate, PS = C_VSS)
 
-# Calculate PN + PS and PN/PS
-df_wide <- left_join(
-  PN %>% select(extract, size, PN_avg = avg, PN_sd = sd), 
-  PS %>% select(extract, size, PS_avg = avg, PS_sd = sd), 
-  by = c("extract", "size")
-  ) %>%
+eps_conc <- left_join(PN, PS, by = c("extract", "size", "replicate")) %>%
+  filter(size != "Floccular") %>%
   mutate(
-    total = PN_avg + PS_avg,
-    PNPS = PN_avg/PS_avg,
-    sd = NA
-    ) 
-
-# Combine into single data frame
-df_conc <- bind_rows(
-  'Protein (PN)' = PN,
-  'Polysaccharide (PS)' = PS,
-  'Total EPS (PN + PS)' = df_wide %>% select(extract, size, avg = total, sd),
-  .id = "assay"
-  ) %>%
-  mutate(y_label = "\u00b5g/mgVSS") %>%  # Concentration
-  select(y_label, assay, extract, size, avg, sd) 
-
-# Calculate PN/PS
-PNPS <- df_wide %>% 
-  mutate(
-    y_label = "", # unitless
-    assay = "PN/PS",
-    sd = NA
-  ) %>%
-  select(y_label, assay, extract, size, avg = PNPS, sd) 
-
-df_all <- bind_rows(df_conc, PNPS) %>%
-  mutate(
-    y_label = factor(y_label, levels = c("\u00b5g/mgVSS", "")),
-    assay = factor(assay, levels = c("Polysaccharide (PS)", "Protein (PN)", "Total EPS (PN + PS)", "PN/PS"))
+    total = PN + PS, 
+    ratio = PN/PS,
   )
+
+summary_wide <- eps_conc %>%
+  group_by(extract, size) %>%
+  summarize(
+    # protein
+    PN_avg = mean(PN), PN_sd = sd(PN),
+    # polysaccharide
+    PS_avg = mean(PS), PS_sd = sd(PS),
+    # total 
+    total_avg = mean(total), total_sd = sd(total),
+    # PN/PS
+    ratio_avg = mean(ratio), ratio_sd = sd(ratio),
+    .groups = "drop"
+  ) 
+
+summary_long <- summary_wide %>%
+  pivot_longer(
+    cols = c(PN_avg, PN_sd,
+             PS_avg, PS_sd,
+             total_avg, total_sd,
+             ratio_avg, ratio_sd),
+    names_to = c("assay", ".value"),
+    names_sep = "_"
+  ) %>%
+  mutate(
+    y_label = if_else(assay == "ratio", "PN/PS", "\u00b5g/mgVSS"),
+    # Write out LB and TB
+    extract = factor(extract, levels = c("TB", "LB")),
+    extract = recode(extract, "LB" = "Loosely Bound", "TB" = "Tightly Bound"),
+    # write out PN, PS, etc
+    assay = factor(assay, levels = c("PS", "PN", "total", "ratio")),
+    assay = recode(assay, "PN" = "Protein (PN)", "PS" = "Polysaccharide (PS)",
+                   "total" = "Total EPS (PN + PS)", "ratio" = "PN/PS")
+    ) 
 
 
 # ------ Plot ------
 
-p <- ggplot(df_all, aes(x = size, y = avg, fill = assay)) +
+p <- ggplot(summary_long, aes(x = size, y = avg, fill = assay)) +
   
   # Concentration Plots
   geom_col(
-    data = subset(df_all, y_label == "\u00b5g/mgVSS"),
+    data = subset(summary_long, y_label == "\u00b5g/mgVSS"),
     position = "dodge",
     width = 0.8
   ) +
   geom_errorbar(
-    data = subset(df_all, y_label == "\u00b5g/mgVSS"),
+    data = subset(summary_long, y_label == "\u00b5g/mgVSS"),
     aes(ymin = avg - sd, ymax = avg + sd),
     position = position_dodge(width = 0.8),
     width = 0.2
@@ -82,8 +70,14 @@ p <- ggplot(df_all, aes(x = size, y = avg, fill = assay)) +
   
   # PN/PS plots
   geom_col(
-    data = subset(df_all, y_label == ""),
+    data = subset(summary_long, y_label == "PN/PS"),
     width = 0.5
+  ) +
+  geom_errorbar(
+    data = subset(summary_long, y_label == "PN/PS"),
+    aes(ymin = avg - sd, ymax = avg + sd),
+    position = position_dodge(width = 0.5),
+    width = 0.5/4
   ) +
   
   # Sizes
