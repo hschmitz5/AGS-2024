@@ -27,7 +27,6 @@ n_sizes      <- length(levels(ps@sam_data$size.mm))
 
 # define sample names
 size_meta <- data.frame(
-  ranges = levels(ps@sam_data$size.mm),
   name = levels(ps@sam_data$size.name),
   midpoint = as.numeric(levels(ps@sam_data$size.midpoint)) # correlation will not accept factors
 )
