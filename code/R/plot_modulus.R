@@ -8,9 +8,34 @@ rm(ps)
 
 fname_in <- "./data/Rheometry_Nov_2024.xlsx"
 
+size_meta <- size_meta %>%
+  rename(size = name)
+
 modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
+  left_join(size_meta, by = "size") %>%
+  select(midpoint, size, freq_rad, G_1, G_2, G_3, G2_1, G2_2, G2_3) %>%
   filter(size != "Floccular") %>%
-  select(size, freq_rad, G_avg, G_sd, G2_avg, G2_sd) %>%
+  pivot_longer(
+    cols = c(G_1:G_3, G2_1:G2_3),
+    names_to = c(".value", "replicate"),
+    names_pattern = "(G2?)_(\\d)"
+    ) 
+  
+modulus_subset <- modulus %>%
+  filter(freq_rad == 0.1) %>%
+  select(-freq_rad) 
+
+# ------ Summarize mean across replicates for plotting ------
+
+mod_summary <- modulus %>%
+  group_by(size, freq_rad) %>%
+  summarize(
+    G_avg = mean(G),
+    G_sd = sd(G),
+    G2_avg = mean(G2),
+    G2_sd = sd(G2),
+    .groups = "drop"
+  ) %>%
   pivot_longer(
     cols = c(G_avg, G_sd, G2_avg, G2_sd),
     names_to = c("measure", ".value"),
@@ -21,26 +46,35 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
     avg = avg/1000, 
     sd = sd/1000,
     # change display names and order
-    size = factor(size, levels = size_meta$name),
+    size = factor(size, levels = size_meta$size),
     measure = factor(measure, levels = c("G", "G2")),
     measure = recode(measure,"G"="Storage Modulus (G')","G2"='Loss Modulus (G")')
-    )
+  )
 
-modulus_subset <- modulus %>%
+mod_summary_subset <- mod_summary %>%
   filter(freq_rad == 0.1) %>%
   select(-freq_rad) 
 
 # ------ Correlation ------
 
-mod_storage <- modulus_subset %>% filter(measure == "Storage Modulus (G')")
-mod_loss <- modulus_subset %>% filter(measure == 'Loss Modulus (G")')
+res_storage <- cor.test(
+  modulus_subset$G, 
+  modulus_subset$midpoint, 
+  method = "spearman", 
+  exact = FALSE
+  )
 
-res_storage <- cor.test(mod_storage$avg, as.numeric(size_meta$midpoint), method = "spearman")
-res_loss <- cor.test(mod_loss$avg, as.numeric(size_meta$midpoint), method = "spearman")
+res_loss <- cor.test(
+  modulus_subset$G2, 
+  modulus_subset$midpoint, 
+  method = "spearman",
+  exact = FALSE
+  )
+
 
 #### Plot
 
-p1 <- ggplot(modulus, aes(x = freq_rad, y = avg, color = size)) +
+p1 <- ggplot(mod_summary, aes(x = freq_rad, y = avg, color = size)) +
   geom_point() +
   geom_line(aes(group = size)) +
   geom_errorbar(
@@ -64,7 +98,7 @@ p1 <- ggplot(modulus, aes(x = freq_rad, y = avg, color = size)) +
       )
     )
 
-p2 <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
+p2 <- ggplot(mod_summary_subset, aes(x = size, y = avg, fill = measure)) +
   geom_col(position = "dodge", width = 0.6) +
   geom_errorbar(
     aes(ymin = avg - sd, ymax = avg + sd),
