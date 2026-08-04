@@ -32,11 +32,6 @@ rel_names <- get_rel_wide(ps) %>%
   head(., n = n_show) %>%
   rownames()
 
-# Names of genera with metabolism annotation
-# m_names <- get_metabolism(data_df) %>%
-#   filter(if_any(everything(), ~ !is.na(.))) %>%
-#   rownames()
-
 data_mat <- data_df %>%
   filter(Genus %in% rel_names) %>%
   dplyr::select(-se, -robust) %>%
