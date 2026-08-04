@@ -6,8 +6,6 @@ source("./code/R/01_load_ps.R")
 # number of rows to show
 n_show <- 30 
 
-write2excel <- 0
-
 # Cell height in inches (adjust as needed)
 cell_h <- 0.2
 cell_w <- 0.2 
