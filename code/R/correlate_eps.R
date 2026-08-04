@@ -1,7 +1,6 @@
 rm(list = ls())
 library(readxl)
 library(tidyverse)
-library(patchwork)
 source("./code/R/01_load_ps.R")
 rm(ps) # do not confuse ps with PS
 
@@ -9,87 +8,94 @@ rm(ps) # do not confuse ps with PS
 
 fname_in <- "./data/Rheometry_Nov_2024.xlsx"
 
-modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
+mod_summary <- read_excel(fname_in, sheet = "input", skip = 1) %>%
+  select(-sieve, -freq_hz) %>%
   filter(size != "Floccular") %>%
-  select(size, freq_rad, G_avg, G_sd, G2_avg, G2_sd) %>%
   pivot_longer(
-    cols = c(G_avg, G_sd, G2_avg, G2_sd),
-    names_to = c("measure", ".value"),
-    names_pattern = "(G2?|G2?)_(avg|sd)"
+    cols = c(G_1:G_3, G2_1:G2_3),
+    names_to = c(".value", "replicate"),
+    names_pattern = "(G2?)_(\\d)"
+  ) %>%
+  # Summarize means
+  group_by(size, freq_rad) %>%
+  summarize(
+    G_avg = mean(G),
+    G_sd = sd(G),
+    G2_avg = mean(G2),
+    G2_sd = sd(G2),
+    .groups = "drop"
   ) %>%
   mutate(
-    size = factor(size, levels = size_meta$name),
-    measure = factor(measure, levels = c("G", "G2"))
+    size = factor(size, levels = size_meta$name)
   )
 
-modulus_subset <- modulus %>%
+mod_summary_subset <- mod_summary %>%
   filter(
-    measure == "G", # G2
     freq_rad == 0.1
     ) %>%
-  select(size, avg) 
+  select(size, G_avg, G2_avg) 
 
 # ------ EPS data ------
 
-# File names for concentration data
-fname_pn    <- paste0("./data/EPS/PN_conc_ags.rds")
-fname_polys <- paste0("./data/EPS/PS_conc_ags.rds")
-
-# Calculate average and std of replicates
-group_data <- function(fname) {
-  df <- readRDS(fname) %>%
-    filter(size != "Floccular") %>%
-    group_by(size, extract) %>%
-    summarize(
-      avg = mean(C_VSS),
-      sd = sd(C_VSS),
-      .groups = "drop"
-    )
-}
-# Apply function to each assay
-PN <- group_data(fname_pn) 
-PS <- group_data(fname_polys)
-
 # Change name for join
 size_meta <- size_meta %>%
-  rename(size = name) %>%
-  select(-ranges)
+  rename(size = name) 
 
-# Calculate PN/PS
-df_wide <- left_join(
-  PN %>% select(size, extract, PN_avg = avg), 
-  PS %>% select(size, extract, PS_avg = avg), 
-  by = c("size", "extract")
-  ) %>%
+PN <- readRDS("./data/EPS/PN_conc_ags.rds") %>%
+  select(extract, size, replicate, PN = C_VSS) %>%
+  filter()
+
+PS <- readRDS("./data/EPS/PS_conc_ags.rds") %>%
+  select(extract, size, replicate, PS = C_VSS)
+
+eps_conc <- left_join(PN, PS, by = c("extract", "size", "replicate")) %>%
+  filter(size != "Floccular") %>%
+  # join midpoint
+  left_join(., size_meta, by = "size") %>%
+  select(extract, midpoint, size, replicate, PN, PS) %>%
+  # Calculate total and ratio
   mutate(
-    total = PN_avg + PS_avg,
-    PNPS = PN_avg/PS_avg
+    total = PN + PS, 
+    ratio = PN/PS,
+    size = factor(size, levels = size_meta$size)
+  ) 
+
+summary_wide <- eps_conc %>%
+  group_by(extract, size) %>%
+  summarize(
+    # protein
+    PN_avg = mean(PN), PN_sd = sd(PN),
+    # polysaccharide
+    PS_avg = mean(PS), PS_sd = sd(PS),
+    # total
+    total_avg = mean(total), total_sd = sd(total),
+    # PN/PS
+    ratio_avg = mean(ratio), ratio_sd = sd(ratio),
+    .groups = "drop"
   ) %>%
-  left_join(., size_meta, by = "size") %>%       # join midpoint
-  left_join(., modulus_subset, by = "size") %>%  # join modulus
-  rename(modulus = avg) 
+  # join modulus
+  left_join(., mod_summary_subset, by = "size") 
+  
 
-# ------ Differential Abundance data ------
+# ------ ANOVA ------
 
-# Community Correlation
-DA_comm <- readRDS("./data/DA/DA_genus_processed.rds") %>%
-  filter(Genus == "Ca_Contendobacter")
+df <- eps_conc %>%
+  filter(extract == "LB")
 
-# Convert EPS concentrations to differential abundance (relative to S)
-DA_eps <- df_wide %>%
-  filter(extract == "LB") %>%
-  mutate(
-    PN_diff = PN_avg - PN_avg[size == "S"][1],
-    PS_diff = PS_avg - PS_avg[size == "S"][1],
-    total_diff = total - total[size == "S"][1],
-    PNPS_diff = PNPS - PNPS[size == "S"][1]
-  ) %>%
-  filter(size != "S") %>%
-  select(extract, size, PN_diff, PS_diff, total_diff, PNPS_diff)
-
+# ANOVA
+mod_PS    <- aov(PS ~ size, data = df)
+# mod_PN    <- aov(PN ~ size, data = df)
+# mod_total <- aov(total ~ size, data = df)
+# mod_ratio <- aov(ratio ~ size, data = df)
+# 
+# # summary(mod)
+# 
+# bartlett.test(PN ~ size, data = df)
+# 
+# # par(mfrow = c(2, 2))
+# # plot(mod)
+  
 # ------ Correlate Size ------
-
-var2 <- c("PN_avg", "PS_avg", "total", "PNPS") # rows
 
 correlate_eps <- function(df_wide, var1, extract_type) {
 
@@ -99,7 +105,12 @@ correlate_eps <- function(df_wide, var1, extract_type) {
     set_names() |>
     map_dfr(
       \(x) broom::tidy(
-        cor.test(df_extract[[var1]], df_extract[[x]], method = "spearman")
+        cor.test(
+          df_extract[[var1]], 
+          df_extract[[x]], 
+          method = "spearman",
+          exact = FALSE
+          )
       ),
       .id = "var"
     ) |>
@@ -111,17 +122,44 @@ correlate_eps <- function(df_wide, var1, extract_type) {
 
 }
 
+# EPS vs size
+var2 <- c("PN", "PS", "total", "ratio") 
+
 res_midpoint <- c("TB", "LB") |>
-  map_dfr(~ correlate_eps(df_wide, "midpoint", .x))
+  map_dfr(~ correlate_eps(eps_conc, "midpoint", .x))
 
-res_modulus <- c("TB", "LB") |>
-  map_dfr(~ correlate_eps(df_wide, "modulus", .x))
+# Mean EPS vs mean modulus
+var2 <- c("PN_avg", "PS_avg", "total_avg", "ratio_avg")
 
+res_modulus_G <- c("TB", "LB") |>
+  map_dfr(~ correlate_eps(summary_wide, "G_avg", .x))
+
+res_modulus_G2 <- c("TB", "LB") |>
+  map_dfr(~ correlate_eps(summary_wide, "G2_avg", .x))
+
+
+# ------ Differential Abundance data ------
+
+# Community Correlation
+DA_comm <- readRDS("./data/DA/DA_genus_processed.rds") %>%
+  filter(Genus == "Ca_Contendobacter")
+
+# Convert EPS concentrations to differential abundance (relative to S)
+DA_eps <- summary_wide %>%
+  filter(extract == "LB") %>%
+  mutate(
+    PN_diff    = PN_avg - PN_avg[size == "S"][1],
+    PS_diff    = PS_avg - PS_avg[size == "S"][1],
+    total_diff = total_avg - total_avg[size == "S"][1],
+    ratio_diff = ratio_avg - ratio_avg[size == "S"][1]
+  ) %>%
+  filter(size != "S") %>%
+  select(extract, size, PN_diff, PS_diff, total_diff, ratio_diff)
 
 
 ### Differential Abundance
 
-vars <- c("PN_diff", "PS_diff", "total_diff", "PNPS_diff")
+vars <- c("PN_diff", "PS_diff", "total_diff", "ratio_diff")
 
 res_DA <- vars |>
   set_names() |>
