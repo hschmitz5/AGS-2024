@@ -3,20 +3,19 @@ library(tidyverse)
 library(ggh4x)
 
 PN <- readRDS("./data/EPS/PN_conc_ags.rds") %>%
-  select(extract, size, replicate, PN = C_VSS) %>%
-  filter()
+  select(extract, size, replicate, PN = C_VSS) 
 
 PS <- readRDS("./data/EPS/PS_conc_ags.rds") %>%
   select(extract, size, replicate, PS = C_VSS)
 
-eps_conc <- left_join(PN, PS, by = c("extract", "size", "replicate")) %>%
+eps <- left_join(PN, PS, by = c("extract", "size", "replicate")) %>%
   filter(size != "Floccular") %>%
   mutate(
     total = PN + PS, 
     ratio = PN/PS,
   )
 
-summary_wide <- eps_conc %>%
+summary_wide <- eps %>%
   group_by(extract, size) %>%
   summarize(
     # protein
