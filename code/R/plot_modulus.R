@@ -27,15 +27,17 @@ modulus_subset <- modulus %>%
 
 # ------ Summarize mean across replicates for plotting ------
 
-mod_summary <- modulus %>%
-  group_by(size, freq_rad) %>%
+mod_summary_wide <- modulus %>%
+  group_by(midpoint, size, freq_rad) %>%
   summarize(
     G_avg = mean(G),
     G_sd = sd(G),
     G2_avg = mean(G2),
     G2_sd = sd(G2),
     .groups = "drop"
-  ) %>%
+  ) 
+
+mod_summary_long <- mod_summary_wide %>%
   pivot_longer(
     cols = c(G_avg, G_sd, G2_avg, G2_sd),
     names_to = c("measure", ".value"),
@@ -51,12 +53,17 @@ mod_summary <- modulus %>%
     measure = recode(measure,"G"="Storage Modulus (G')","G2"='Loss Modulus (G")')
   )
 
-mod_summary_subset <- mod_summary %>%
+mod_subset_sum_w <- mod_summary_wide %>%
+  filter(freq_rad == 0.1) %>%
+  select(-freq_rad) 
+
+mod_subset_sum_l <- mod_summary_long %>%
   filter(freq_rad == 0.1) %>%
   select(-freq_rad) 
 
 # ------ Correlation ------
 
+# replicate level
 res_storage <- cor.test(
   modulus_subset$G, 
   modulus_subset$midpoint, 
@@ -71,10 +78,23 @@ res_loss <- cor.test(
   exact = FALSE
   )
 
+# mean
+res_storage_mean <- cor.test(
+  mod_subset_sum_w$G_avg,
+  mod_subset_sum_w$midpoint, 
+  method = "spearman"
+)
+
+res_loss_mean <- cor.test(
+  mod_subset_sum_w$G2_avg,
+  mod_subset_sum_w$midpoint, 
+  method = "spearman"
+)
+
 
 #### Plot
 
-p1 <- ggplot(mod_summary, aes(x = freq_rad, y = avg, color = size)) +
+p1 <- ggplot(mod_summary_long, aes(x = freq_rad, y = avg, color = size)) +
   geom_point() +
   geom_line(aes(group = size)) +
   geom_errorbar(
@@ -98,7 +118,7 @@ p1 <- ggplot(mod_summary, aes(x = freq_rad, y = avg, color = size)) +
       )
     )
 
-p2 <- ggplot(mod_summary_subset, aes(x = size, y = avg, fill = measure)) +
+p2 <- ggplot(mod_subset_sum_l, aes(x = size, y = avg, fill = measure)) +
   geom_col(position = "dodge", width = 0.6) +
   geom_errorbar(
     aes(ymin = avg - sd, ymax = avg + sd),
