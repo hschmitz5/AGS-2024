@@ -60,8 +60,8 @@ eps_conc <- left_join(PN, PS, by = c("extract", "size", "replicate")) %>%
     size = factor(size, levels = size_meta$size)
   ) 
 
-summary_wide <- eps_conc %>%
-  group_by(extract, size) %>%
+eps_summary <- eps_conc %>%
+  group_by(extract, midpoint, size) %>%
   summarize(
     # protein
     PN_avg = mean(PN), PN_sd = sd(PN),
@@ -83,17 +83,14 @@ df <- eps_conc %>%
   filter(extract == "LB")
 
 # ANOVA
-mod_PS    <- aov(PS ~ size, data = df)
-# mod_PN    <- aov(PN ~ size, data = df)
-# mod_total <- aov(total ~ size, data = df)
-# mod_ratio <- aov(ratio ~ size, data = df)
-# 
-# # summary(mod)
-# 
-# bartlett.test(PN ~ size, data = df)
-# 
-# # par(mfrow = c(2, 2))
-# # plot(mod)
+mod_PN    <- aov(PN ~ size, data = df)
+
+summary(mod_PN)
+
+bartlett.test(PN ~ size, data = df)
+
+# par(mfrow = c(2, 2))
+# plot(mod)
   
 # ------ Correlate Size ------
 
@@ -122,20 +119,26 @@ correlate_eps <- function(df_wide, var1, extract_type) {
 
 }
 
-# EPS vs size
-var2 <- c("PN", "PS", "total", "ratio") 
+# replicate level variables
+var2 <- c("PN", "PS", "total", "ratio")
 
-res_midpoint <- c("TB", "LB") |>
+# EPS vs size (replicate level)
+res_midpoint_rep <- c("TB", "LB") |>
   map_dfr(~ correlate_eps(eps_conc, "midpoint", .x))
 
-# Mean EPS vs mean modulus
+# mean level variables
 var2 <- c("PN_avg", "PS_avg", "total_avg", "ratio_avg")
 
+# EPS vs size (mean)
+res_midpoint <- c("TB", "LB") |>
+  map_dfr(~ correlate_eps(eps_summary, "midpoint", .x))
+
+# Mean EPS vs mean modulus
 res_modulus_G <- c("TB", "LB") |>
-  map_dfr(~ correlate_eps(summary_wide, "G_avg", .x))
+  map_dfr(~ correlate_eps(eps_summary, "G_avg", .x))
 
 res_modulus_G2 <- c("TB", "LB") |>
-  map_dfr(~ correlate_eps(summary_wide, "G2_avg", .x))
+  map_dfr(~ correlate_eps(eps_summary, "G2_avg", .x))
 
 
 # ------ Differential Abundance data ------
@@ -145,7 +148,7 @@ DA_comm <- readRDS("./data/DA/DA_genus_processed.rds") %>%
   filter(Genus == "Ca_Contendobacter")
 
 # Convert EPS concentrations to differential abundance (relative to S)
-DA_eps <- summary_wide %>%
+DA_eps <- eps_summary %>%
   filter(extract == "LB") %>%
   mutate(
     PN_diff    = PN_avg - PN_avg[size == "S"][1],
