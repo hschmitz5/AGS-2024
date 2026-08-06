@@ -6,14 +6,14 @@ library(MetBrewer)
 source("./code/R/01_load_ps.R")
 rm(ps)
 
-fname_in <- "./data/Rheometry_Nov_2024.xlsx"
+raw_df <- read_excel("./data/Rheometry_Nov_2024.xlsx", sheet = "input", skip = 1)
 
 size_meta <- size_meta %>%
   rename(size = name)
 
-modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
-  left_join(size_meta, by = "size") %>%
-  select(midpoint, size, freq_rad, G_1, G_2, G_3, G2_1, G2_2, G2_3) %>%
+modulus <- size_meta %>%
+  left_join(raw_df, by = "size") %>%
+  select(-sieve, -freq_hz) %>%
   filter(size != "Floccular") %>%
   pivot_longer(
     cols = c(G_1:G_3, G2_1:G2_3),
