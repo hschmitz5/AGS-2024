@@ -29,7 +29,7 @@ sum_rel_ab_by_function <- function(ps) {
         filter(Genus %in% taxa_list[[nm]]) %>%
         group_by(size.name, Sample) %>%
         summarize(
-          sum_abund = sum(Abundance, na.rm = TRUE),
+          sum_abund = sum(Abundance),
           .groups = "drop"
         ) %>%
         mutate(metab = nm)
@@ -45,8 +45,8 @@ sum_rel_ab_by_function <- function(ps) {
     df %>%
       group_by(metab, size.name) %>%
       summarize(
-        mean_sum = mean(sum_abund, na.rm = TRUE),
-        sd_sum = sd(sum_abund, na.rm = TRUE),
+        mean_sum = mean(sum_abund),
+        sd_sum = sd(sum_abund),
         .groups = "drop"
       ) %>%
       mutate(metab_val = value_col)
