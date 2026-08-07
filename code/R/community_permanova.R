@@ -4,19 +4,20 @@ library(tidyverse)
 library(vegan)
 library(writexl)
 
+# ------ Overall Result ------
+
 # load phyloseq object for all sample sizes
 ps <- readRDS("./data/phyloseq/ps_ASV.rds")
 
-# define minimum depth to rarefy
-rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
-
-# ------ Overall Result ------
-
 metadata <- data.frame(sample_data(ps))
+
 # rows are samples, columns are OTUs
 otu_matrix_full <- t(
   as.data.frame(otu_table(ps))
 )
+
+# define minimum depth to rarefy
+rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
 
 set.seed(1)
 dist_matrix_full <- avgdist(otu_matrix_full, sample = rarefy_level, iterations = 10, dmethod = "bray")
