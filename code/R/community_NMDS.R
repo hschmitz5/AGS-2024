@@ -11,7 +11,9 @@ metadata <- data.frame(sample_data(ps)) %>%
   rownames_to_column(var = "SampleID")
 
 # rows are samples, columns are OTUs
-otu_matrix <- data.frame(t(otu_table(ps)))
+otu_matrix <- t(
+  as.data.frame(otu_table(ps))
+)
 
 # define minimum depth to rarefy
 rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
