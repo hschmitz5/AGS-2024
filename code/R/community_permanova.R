@@ -14,7 +14,9 @@ rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
 
 metadata <- data.frame(sample_data(ps))
 # rows are samples, columns are OTUs
-otu_matrix_full <- data.frame(t(otu_table(ps)))
+otu_matrix_full <- t(
+  as.data.frame(otu_table(ps))
+)
 
 set.seed(1)
 dist_matrix_full <- avgdist(otu_matrix_full, sample = rarefy_level, iterations = 10, dmethod = "bray")
@@ -53,7 +55,9 @@ for (i in seq_along(all_combos)) {
   meta_sub <- data.frame(sample_data(ps_sub))
   
   # rows are samples, columns are OTUs
-  otu_matrix <- data.frame(t(otu_table(ps_sub)))
+  otu_matrix <- t(
+    as.data.frame(otu_table(ps_sub))
+  )
   
   dist_matrix <- avgdist(otu_matrix, sample = rarefy_level, iterations = 10, dmethod = "bray")
   
