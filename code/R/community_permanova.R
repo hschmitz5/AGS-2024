@@ -21,6 +21,7 @@ otu_matrix_full <- t(
 set.seed(1)
 dist_matrix_full <- avgdist(otu_matrix_full, sample = rarefy_level, iterations = 10, dmethod = "bray")
 
+# PERMANOVA
 overall_res <- adonis2(
   dist_matrix_full ~ size.name,
   data = metadata,
@@ -28,7 +29,7 @@ overall_res <- adonis2(
   ) %>%
   rownames_to_column(var = "Data")
 
-# Want Insignificant 
+# Multivariate homogeneity of groups dispersions
 overall_bd <- anova(
   betadisper(dist_matrix_full, metadata$size.name)
   )
@@ -61,13 +62,14 @@ for (i in seq_along(all_combos)) {
   
   dist_matrix <- avgdist(otu_matrix, sample = rarefy_level, iterations = 10, dmethod = "bray")
   
+  # PERMANOVA
   res <- adonis2(
     dist_matrix ~ size.name,
     data = meta_sub,
     permutations = 719
   )
   
-  # Want Insignificant 
+  # Multivariate homogeneity of groups dispersions
   bd_res <- anova(
     betadisper(dist_matrix, meta_sub$size.name)
     )
