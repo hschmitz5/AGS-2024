@@ -41,94 +41,70 @@ overall_bd <- anova(
 sizes <- c("Floccular", "S", "M", "L", "XL", "XXL")
 all_combos <- combn(sizes, 2, simplify = FALSE)
 
-# Initialize empty data frame
-num_rows <- length(all_combos)
-df <- data.frame(matrix(NA, nrow = num_rows, ncol = 5))
-colnames(df) <- c("sz_1", "sz_2", "R2", "p_value", "bd_pval")
-
-for (i in seq_along(all_combos)) {
+pairwise_adonis <- function(sample_pair) {
   
-  sample_pair <- all_combos[[i]]
+  keep <- sample_names(ps)[sample_data(ps)$size.name %in% sample_pair]
   
-  ps_sub <- subset_samples(ps, size.name %in% sample_pair)
-  # prune OTUs that do not exist in this pair
+  ps_sub <- prune_samples(keep, ps)
   ps_sub <- prune_taxa(taxa_sums(ps_sub) > 0, ps_sub)
   
-  meta_sub <- data.frame(sample_data(ps_sub))
   
-  # rows are samples, columns are OTUs
-  otu_matrix <- t(
-    as.data.frame(otu_table(ps_sub))
+  meta <- data.frame(sample_data(ps_sub))
+  otu <- t(as.data.frame(otu_table(ps_sub)))
+  
+  dist <- avgdist(
+    otu,
+    sample = rarefy_level,
+    iterations = 10,
+    dmethod = "bray"
   )
   
-  dist_matrix <- avgdist(otu_matrix, sample = rarefy_level, iterations = 10, dmethod = "bray")
-  
-  # PERMANOVA
-  res <- adonis2(
-    dist_matrix ~ size.name,
-    data = meta_sub,
+  ad <- adonis2(
+    dist ~ size.name,
+    data = meta,
     permutations = 719
   )
   
-  # Multivariate homogeneity of groups dispersions
-  bd_res <- anova(
-    betadisper(dist_matrix, meta_sub$size.name)
-    )
-
-  df[i, ] <- tibble(
-    sz_1 = sample_pair[1],
-    sz_2 = sample_pair[2],
-    R2 = res$R2[1],
-    p_value = res$`Pr(>F)`[1],
-    bd_pval = bd_res$'Pr(>F)'[1]
+  bd <- anova(
+    betadisper(dist, meta$size.name)
+  )
+  
+  tibble(
+    sz_1    = sample_pair[1],
+    sz_2    = sample_pair[2],
+    R2      = ad$R2[1],
+    p_value = ad$`Pr(>F)`[1],
+    bd_pval = bd$`Pr(>F)`[1]
   )
 }
 
-
-df_p <- df %>%
-  dplyr::select(sz_1, sz_2, p_value) %>%
-  pivot_wider(
-    names_from = sz_2,
-    values_from = p_value
-  ) 
-
-df_R2 <- df %>%
-  dplyr::select(sz_1, sz_2, R2) %>%
-  pivot_wider(
-    names_from = sz_2,
-    values_from = R2
-  ) 
-
-df_bd <- df %>%
-  dplyr::select(sz_1, sz_2, bd_pval) %>%
-  pivot_wider(
-    names_from = sz_2,
-    values_from = bd_pval
-  ) 
-
-saveRDS(df_bd, file = "./data/bray_betadisper_result.rds")
-
-bd_long <- df_bd |>
-  pivot_longer(!sz_1, names_to = "sz_2", values_to = "bd") 
-
-bd_long$sz_1 <- factor(bd_long$sz_1, levels = rev(sizes))
-bd_long$sz_2 <- factor(bd_long$sz_2, levels = sizes)
-
-# ------ Write to Excel ------
-
-fname_out <- "./data/ADONIS_Bray.xlsx"
-write_xlsx(
-  list(
-    p_values = df_p,
-    bd_pvalues = df_bd,
-    R2 = df_R2,
-    overall = overall_res,
-    bd = overall_bd
-  ),
-  path = fname_out
+df_long <- map_dfr(all_combos, pairwise_adonis) %>%
+  mutate(
+    sz_1 = factor(sz_1, levels = rev(sizes)),
+    sz_2 = factor(sz_2, levels = sizes),
   )
 
+# Create list that combines pairwise statistics
+stat_var <- c("p_value", "R2", "bd_pval")
+
+df_wide <- map(
+  set_names(stat_var), \(var) {
+  df_long %>%
+    dplyr::select(sz_1, sz_2, all_of(var)) %>%
+    pivot_wider(
+      names_from = sz_2,
+      values_from = all_of(var)
+      )
+    })
+
+df_wide$p_value
+df_wide$R2
+df_wide$bd_pval
+
 # ------ Plot ------
+
+bd_long <- df_long %>%
+  select(sz_1, sz_2, bd = bd_pval) 
 
 p <- ggplot(data = bd_long, aes(x = sz_2, y = sz_1, fill = bd)) +
   geom_tile() + 
@@ -148,6 +124,21 @@ p <- ggplot(data = bd_long, aes(x = sz_2, y = sz_1, fill = bd)) +
 
 fname <- "./figures/Figure_S.2.tif"
 ggsave(fname, plot = p, width = 5.38, height = 3, dpi = 300)
+
+
+# ------ Write to Excel ------
+
+fname_out <- "./data/ADONIS_Bray.xlsx"
+write_xlsx(
+  list(
+    overall = overall_res,
+    bd = overall_bd,
+    p_values = df_wide$p_value,
+    R2 = df_wide$R2,
+    bd_pvalues = df_wide$bd_pval
+  ),
+  path = fname_out
+)
 
 # ------ Look at distance matrix ------
 
