@@ -52,6 +52,13 @@ summary_long <- summary_wide %>%
 
 # ------ Plot ------
 
+max_pnps <- subset(summary_long, y_label == "PN/PS") %>%
+  summarize(
+    max_val = max(avg + sd)
+  ) %>%
+  pull(max_val)
+
+
 p <- ggplot(summary_long, aes(x = size, y = avg, fill = assay)) +
   
   # Concentration Plots
@@ -90,8 +97,8 @@ p <- ggplot(summary_long, aes(x = size, y = avg, fill = assay)) +
     y = list(
       scale_y_continuous(),   
       scale_y_continuous(), 
-      scale_y_continuous(breaks = c(0, 2, 4)), # PN/PS row
-      scale_y_continuous(breaks = c(0, 2, 4))  # PN/PS row
+      scale_y_continuous(limits = c(0, max_pnps), breaks = c(0, 2.5, 5)), # PN/PS
+      scale_y_continuous(limits = c(0, max_pnps), breaks = c(0, 2.5, 5))  
     )
   ) +
   force_panelsizes(rows = c(1, 1/3), cols = c(1, 1)) +
