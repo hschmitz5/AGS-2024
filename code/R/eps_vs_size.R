@@ -2,6 +2,8 @@ rm(list = ls())
 library(tidyverse)
 library(ggh4x)
 
+text_size <- 16
+
 PN <- readRDS("./data/EPS/PN_conc_ags.rds") %>%
   select(extract, size, replicate, PN = C_VSS) 
 
@@ -118,12 +120,12 @@ p <- ggplot(summary_long, aes(x = size, y = avg, fill = assay)) +
     fill = NULL
   ) +
   
-  theme_classic(base_size = 12) +
+  theme_classic(base_size = text_size) +
   theme(
     strip.placement = "outside",
     strip.background = element_blank()
   )
 
 
-fname_out <- "./figures/Figure_2.tif"
+fname_out <- "./figures/Figure_2_big.png"
 ggsave(fname_out, plot = p, width = 6.5, height = 3, dpi = 300)

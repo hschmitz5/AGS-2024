@@ -18,6 +18,7 @@ metab_fname <- "./data/metabolism_midas.xlsx"
 size_pal <- "Greek"     # reds
 taxa_pal <- "Hiroshige" # orange, blue
 
+text_size <- 16 # 12
 
 # ------ Define size groups ----------
 

@@ -110,7 +110,7 @@ p1 <- ggplot(mod_summary_long, aes(x = freq_rad, y = avg, color = size)) +
     x = "Frequency (rad/s)",
     y = "Modulus (kPa)",
   ) +
-  theme_classic(base_size = 12) +
+  theme_classic(base_size = text_size) +
   theme(
     legend.position = "right",
     strip.background = element_rect(
@@ -133,7 +133,7 @@ p2 <- ggplot(mod_subset_sum_l, aes(x = size, y = avg, fill = measure)) +
   scale_fill_manual(
     values = c("plum4", "lightgray")
   ) +
-  theme_classic(base_size = 12) +
+  theme_classic(base_size = text_size) +
   theme(
     legend.title = element_blank()
   )
@@ -144,5 +144,5 @@ p <- plot_grid(
   labels = "auto", ncol = 1, rel_widths = c(6.5, 5)
 )
 
-fname_out <- "./figures/Figure_1.tif"
+fname_out <- "./figures/Figure_1_big.png"
 ggsave(fname_out, plot = p, width = 6.5, height = 5, dpi = 300)

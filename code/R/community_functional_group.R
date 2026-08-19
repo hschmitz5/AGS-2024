@@ -59,7 +59,7 @@ p <- p1 + p2 +
     values = c("Positive" = "steelblue",
                "Positive + Variable" = "lightgray")
   ) &
-  theme_classic(base_size = 12) +
+  theme_classic(base_size = text_size) +
   theme(
     plot.title = element_text(hjust = 0.5), # center title
     legend.position = "bottom",
@@ -69,7 +69,7 @@ p <- p1 + p2 +
     ) 
   
 # Save plot
-fname <- "./figures/Figure_4.tif"
+fname <- "./figures/Figure_4_big.png"
 ggsave(fname, plot = p, width = 6.5, height = 6, dpi = 300)
 
 
